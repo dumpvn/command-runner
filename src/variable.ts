@@ -93,7 +93,6 @@ export default () => cache({
         return '';
     },
 
-    /* 当前多行 */
     lineNumbers(): string {
         const selections = this.selections();
 
@@ -190,4 +189,14 @@ export default () => cache({
             ...this.package()['commands'] as object,
         };
     },
+
+    currentLineText(): string {
+        const activeEditor = vscode.window.activeTextEditor;
+        if (activeEditor) {
+            const {text} = activeEditor.document.lineAt(activeEditor.selection.active.line);
+            return text;
+        }
+        return '';
+    }
 });
+

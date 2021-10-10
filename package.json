@@ -2,7 +2,7 @@
     "name": "command-runner",
     "displayName": "command runner",
     "description": "command runner",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "icon": "resource/powershell_128px.png",
     "repository": {
         "type": "git",
@@ -111,8 +111,8 @@
             },
             {
                 "command": "command-runner.runInTerminal",
-                "key": "ctrl+alt+r",
-                "mac": "ctrl+alt+r"
+                "key": "ctrl+shift+enter",
+                "mac": "ctrl+shift+enter"
             }
         ],
         "menus": {

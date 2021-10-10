@@ -103,7 +103,7 @@ or
 ## Usages
 
 * use shortcut `Ctrl+Shift+R` to select custom command
-* use shortcut `Ctrl+Alt+R` to run selected content as shell command
+* use shortcut `Ctrl+Shift+Enter` to run selected content as shell command, if there is no selection, the current line will be executed.
 * or press `F1` and then select/type `Run Command` or `Run In Terminal`,
 * or right click the Text Editor and then click `Run Command` to select custom command in editor context menu
 * or right click the Text Editor and then click `Run In Terminal` to run selected content as shell command in editor context menu

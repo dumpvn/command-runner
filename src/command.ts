@@ -126,6 +126,6 @@ export default class Command {
     }
 
     public async executeSelectText(options?: TerminalOptions) {
-        await this.execute(this.$accessor.variable('selectedTextSection'), options);
+        await this.execute(this.$accessor.variable('selectedTextSection') || this.$accessor.variable('currentLineText'), options);
     }
 }
