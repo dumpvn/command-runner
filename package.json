@@ -1,0 +1,161 @@
+{
+    "name": "command-runner",
+    "displayName": "command-runner",
+    "description": "command runner",
+    "version": "0.0.1",
+    "icon": "resource/powershell_128px.png",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/dumpvn/command-runner.git"
+    },
+    "homepage": "https://github.com/dumpvn/command-runner/blob/master/README.md",
+    "bugs": {
+        "url": "https://github.com/dumpvn/command-runner/issues",
+        "email": "dumpvn@gmail.com"
+    },
+    "publisher": "dumpvn",
+    "engines": {
+        "vscode": "^1.61.0"
+    },
+    "categories": [
+        "Other"
+    ],
+    "activationEvents": [
+        "onCommand:command-runner.run",
+        "onCommand:command-runner.runInTerminal"
+    ],
+    "main": "./out/extension.js",
+    "contributes": {
+        "commands": [
+            {
+                "command": "command-runner.run",
+                "title": "Run Command"
+            },
+            {
+                "command": "command-runner.runInTerminal",
+                "title": "Run In Terminal"
+            }
+        ],
+        "configuration": {
+            "type": "object",
+            "title": "Run Command Configuration",
+            "properties": {
+                "command-runner.terminal.name": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Specifies the terminal name to execute the command.",
+                    "scope": "resource"
+                },
+                "command-runner.terminal.cwd": {
+                    "type": "string",
+                    "description": "A path or Uri for the current working directory to be used for the terminal.",
+                    "scope": "resource"
+                },
+                "command-runner.terminal.env": {
+                    "type": "string",
+                    "description": "Object with environment variables that will be added to the VS Code process.",
+                    "scope": "resource"
+                },
+                "command-runner.terminal.shellPath": {
+                    "type": "string",
+                    "description": "A path to a custom shell executable to be used in the terminal.",
+                    "scope": "resource"
+                },
+                "command-runner.terminal.shellArgs": {
+                    "type": [
+                        "string",
+                        "array"
+                    ],
+                    "description": "Args for the custom shell executable. A string can be used on Windows only which allows specifying shell args in command-line format.",
+                    "scope": "resource"
+                },
+                "command-runner.terminal.autoClear": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Clear the content of terminal before execute the command.",
+                    "scope": "resource"
+                },
+                "command-runner.terminal.autoFocus": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Focus the terminal when execute the command.",
+                    "scope": "resource"
+                },
+                "command-runner.commands": {
+                    "type": "object",
+                    "default": {
+                        "echo": "echo 'this is a test command: ${workspaceFolder}'"
+                    },
+                    "description": "Set the custom command to run.",
+                    "scope": "resource"
+                },
+                "command-runner.showRunCommandInEditorContextMenu": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Show 'Run Command' in editor context menu",
+                    "scope": "resource"
+                },
+                "command-runner.showRunCommandInExplorerContextMenu": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Show 'Run Command' in explorer context menu",
+                    "scope": "resource"
+                }
+            }
+        },
+        "keybindings": [
+            {
+                "command": "command-runner.run",
+                "key": "ctrl+shift+r",
+                "mac": "ctrl+shift+r"
+            },
+            {
+                "command": "command-runner.runInTerminal",
+                "key": "ctrl+alt+r",
+                "mac": "ctrl+alt+r"
+            }
+        ],
+        "menus": {
+            "editor/context": [
+                {
+                    "when": "!inOutput && config.command-runner.showRunCommandInEditorContextMenu",
+                    "command": "command-runner.run",
+                    "group": "navigation"
+                },
+                {
+                    "when": "editorHasSelection && !inOutput && config.command-runner.showRunCommandInEditorContextMenu",
+                    "command": "command-runner.runInTerminal",
+                    "group": "navigation"
+                }
+            ],
+            "explorer/context": [
+                {
+                    "when": "config.command-runner.showRunCommandInExplorerContextMenu",
+                    "command": "command-runner.run",
+                    "group": "navigation"
+                }
+            ]
+        }
+    },
+    "scripts": {
+        "vscode:prepublish": "npm run compile",
+        "compile": "tsc -p ./",
+        "watch": "tsc -watch -p ./",
+        "pretest": "npm run compile && npm run lint",
+        "lint": "eslint src --ext ts",
+        "test": "node ./out/test/runTest.js"
+    },
+    "devDependencies": {
+        "@types/glob": "^7.1.4",
+        "@types/mocha": "^9.0.0",
+        "@types/node": "14.x",
+        "@types/vscode": "^1.61.0",
+        "@typescript-eslint/eslint-plugin": "^4.31.1",
+        "@typescript-eslint/parser": "^4.31.1",
+        "@vscode/test-electron": "^1.6.2",
+        "eslint": "^7.32.0",
+        "glob": "^7.1.7",
+        "mocha": "^9.1.1",
+        "typescript": "^4.4.3"
+    }
+}
