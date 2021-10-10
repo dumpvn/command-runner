@@ -5,6 +5,9 @@ import * as vscode from 'vscode';
 import variable from './variable';
 
 
+/*
+start https://stackoverflow.com/questions/55377365/what-does-keyof-typeof-mean-in-typescript
+*/
 export const variableMap = {
     file: 1,
     fileBasename: 1,

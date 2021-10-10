@@ -1,17 +1,15 @@
-
-
 'use strict';
 
 
+/* 
 
+start https://stackoverflow.com/questions/51936369/what-is-the-record-type-in-typescript
+
+*/
 export default function cache<T extends object>(target: T): T {
 
-
-    // https://stackoverflow.com/questions/51936369/what-is-the-record-type-in-typescript
     const cached: Record<string, unknown> = Object.create(null);
-
     const proxy: T = Object.create(target);
-
 
     Object.keys(target).forEach(key => {
         const handler = target[key as keyof T];
@@ -29,6 +27,4 @@ export default function cache<T extends object>(target: T): T {
     });
 
     return proxy;
-
 }
-

@@ -5,10 +5,12 @@ import replace from './replace';
 import Accessor, { VariableScope } from './accessor';
 
 
-// Utility Types https://www.typescriptlang.org/docs/handbook/utility-types.html
-// & in a type position means intersection type. https://stackoverflow.com/a/38317664
-// Intersection Types https://www.typescriptlang.org/docs/handbook/2/objects.html#intersection-types
-// https://code.visualstudio.com/api/references/vscode-api#TerminalOptions
+/* 
+start https://www.typescriptlang.org/docs/handbook/utility-types.html # Utility Types 
+start https://stackoverflow.com/a/38317664 # & in a type position means intersection type. 
+start https://www.typescriptlang.org/docs/handbook/2/objects.html#intersection-types # Intersection Types 
+start https://code.visualstudio.com/api/references/vscode-api#TerminalOptions
+*/
 export type TerminalOptions = Partial<vscode.TerminalOptions> & {
     autoFocus?: boolean;
     autoClear?: boolean;
