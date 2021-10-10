@@ -1,8 +1,8 @@
 {
     "name": "command-runner",
-    "displayName": "command-runner",
+    "displayName": "command runner",
     "description": "command runner",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "icon": "resource/powershell_128px.png",
     "repository": {
         "type": "git",
@@ -38,7 +38,7 @@
         ],
         "configuration": {
             "type": "object",
-            "title": "Run Command Configuration",
+            "title": "Command Runner",
             "properties": {
                 "command-runner.terminal.name": {
                     "type": "string",
