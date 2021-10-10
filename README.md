@@ -2,6 +2,10 @@
 
 Run custom shell command defined in vs code configuration and node module package.json
 
+start https://github.com/dumpvn/command-runner
+start https://code.visualstudio.com/api/references/contribution-points#keybinding-example
+
+
 ## Features
 
 * Run custom shell command
