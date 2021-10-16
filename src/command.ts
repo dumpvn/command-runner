@@ -49,6 +49,11 @@ export default class Command {
         file && this.$files.push(JSON.stringify(file));
     }
 
+    /* change the replace template to ${{xxx}} to make it work for variable in bash shell e.g.
+    BUCKET_ID=$(dd if=/dev/random bs=8 count=1 2>/dev/null | od -An -tx1 | tr -d ' \t\n')
+    echo ${BUCKET_ID} # should work for bash shell
+    echo ${{currentLineText}}
+    */
     public async resolve(cmd: string): Promise<string> {
         return cmd && replace(cmd, async str => {
             let [variable, args = ''] = str.split(':');

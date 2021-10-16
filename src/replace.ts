@@ -1,6 +1,6 @@
 'use strict';
 
-const regexp = /\$\{(.*?)\}/g;
+const regexp = /\$\{\{(.*?)\}\}/g;
 
 async function replace(str: string, handler: (matched: string) => string | Promise<string>): Promise<string> {
 
