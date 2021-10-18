@@ -6,4 +6,11 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
-- Initial release
+## [0.0.8] - 2021-10-18
+### Added
+- expand DOS env variable like %PATH%
+
+
+## [0.0.7] - 2021-10-10
+### Added
+- chnage replace format from ${env:PATH} to ${{env:PATH}} to support bash variable like ${HOME}
