@@ -6,6 +6,10 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
+## [0.0.9] - 2021-10-20
+### Added
+- option to run block of code line by line
+
 ## [0.0.8] - 2021-10-18
 ### Added
 - expand DOS env variable like %PATH%

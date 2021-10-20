@@ -12,6 +12,7 @@ start https://www.typescriptlang.org/docs/handbook/2/objects.html#intersection-t
 start https://code.visualstudio.com/api/references/vscode-api#TerminalOptions
 */
 export type TerminalOptions = Partial<vscode.TerminalOptions> & {
+    executeLineByLine?: boolean;
     autoFocus?: boolean;
     autoClear?: boolean;
     sorted?: string[];
@@ -111,7 +112,7 @@ export default class Command {
     }
 
     public async execute(cmd: string, options?: TerminalOptions) {
-        const { autoClear, autoFocus, ...terminalOptions }: TerminalOptions = {
+        const { executeLineByLine, autoClear, autoFocus, ...terminalOptions }: TerminalOptions = {
             ...this.$accessor.config('command-runner.terminal'),
             ...options,
             hideFromUser: false,
@@ -128,7 +129,18 @@ export default class Command {
 
         const command = cmd + ' ' + this.$files.join(' ');
 
-        terminal.sendText(await this.resolve(command));
+        // send a block of code usually causing terminal issue
+        const text = await this.resolve(command);
+        if (executeLineByLine) {
+            var texts = text.split("\n");
+            for(var i in texts) { 
+                terminal.sendText(texts[i], false); // send line by line
+            }
+            terminal.sendText("", true); // final enter
+        } else {
+            terminal.sendText(text, true);
+        }
+        
         console.log('--> Run Command:', command);
     }
 

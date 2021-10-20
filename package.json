@@ -2,7 +2,7 @@
     "name": "command-runner",
     "displayName": "command runner",
     "description": "command runner",
-    "version": "0.0.8",
+    "version": "0.0.9",
     "icon": "resource/powershell_128px.png",
     "repository": {
         "type": "git",
@@ -67,6 +67,12 @@
                         "array"
                     ],
                     "description": "Args for the custom shell executable. A string can be used on Windows only which allows specifying shell args in command-line format.",
+                    "scope": "resource"
+                },
+                "command-runner.terminal.executeLineByLine": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Split the selected content into multiple lines and execute line by line",
                     "scope": "resource"
                 },
                 "command-runner.terminal.autoClear": {
