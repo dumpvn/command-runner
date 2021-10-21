@@ -6,6 +6,11 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
+## [0.0.11] - 2021-10-21
+### Changed
+- Added warning to readme.
+
+
 ## [0.0.10] - 2021-10-21
 ### Changed
 - selected text won't be trimmed, user able to blank lines

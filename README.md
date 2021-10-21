@@ -1,5 +1,11 @@
 # VSCode Command Runner
 
+WARN!!!
+
+don't use this extension, it is for my personal learning!!!
+
+Use offial project from author https://marketplace.visualstudio.com/items?itemName=edonet.vscode-command-runner
+
 Run custom shell command defined in vs code configuration and node module package.json
 
 start 'https://github.com/dumpvn/command-runner'
