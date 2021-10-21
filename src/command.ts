@@ -13,6 +13,8 @@ start https://code.visualstudio.com/api/references/vscode-api#TerminalOptions
 */
 export type TerminalOptions = Partial<vscode.TerminalOptions> & {
     executeLineByLine?: boolean;
+    replaceTemplate?: boolean;
+    commandDelay?: number;
     autoFocus?: boolean;
     autoClear?: boolean;
     sorted?: string[];
@@ -111,8 +113,10 @@ export default class Command {
         }
     }
 
+
+
     public async execute(cmd: string, options?: TerminalOptions) {
-        const { executeLineByLine, autoClear, autoFocus, ...terminalOptions }: TerminalOptions = {
+        const { commandDelay, replaceTemplate, executeLineByLine, autoClear, autoFocus, ...terminalOptions }: TerminalOptions = {
             ...this.$accessor.config('command-runner.terminal'),
             ...options,
             hideFromUser: false,
@@ -129,8 +133,15 @@ export default class Command {
 
         const command = cmd + ' ' + this.$files.join(' ');
        
+        function delay(ms: number) {
+            return new Promise( resolve => setTimeout(resolve, ms) );
+        }
+
         // send a block of code usually causing terminal issue
-        const text = await this.resolve(command);
+        let text = command;
+        if (replaceTemplate) {
+            text = await this.resolve(command);
+        }
         if (executeLineByLine) {
             let texts = [];
             if (vscode.window.activeTextEditor?.document.eol === vscode.EndOfLine.LF) {
@@ -140,6 +151,7 @@ export default class Command {
             }
             for(var i in texts) { 
                 terminal.sendText(texts[i], true); // send line by line
+                await delay(commandDelay ?? 50);
             }
             terminal.sendText("", true); // final enter
         } else {

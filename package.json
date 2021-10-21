@@ -2,7 +2,7 @@
     "name": "command-runner",
     "displayName": "command runner",
     "description": "command runner",
-    "version": "0.0.11",
+    "version": "0.0.12",
     "icon": "resource/powershell_128px.png",
     "repository": {
         "type": "git",
@@ -73,6 +73,18 @@
                     "type": "boolean",
                     "default": false,
                     "description": "Split the selected content into multiple lines and execute line by line",
+                    "scope": "resource"
+                },
+                "command-runner.terminal.replaceTemplate": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Replace placeholder template",
+                    "scope": "resource"
+                },
+                "command-runner.terminal.commandDelay": {
+                    "type": "number",
+                    "default": 50,
+                    "description": "Delay milliseconds between commands",
                     "scope": "resource"
                 },
                 "command-runner.terminal.autoClear": {

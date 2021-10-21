@@ -6,6 +6,11 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
+## [0.0.12] - 2021-10-21
+### Added
+- option to disable replace template
+- delay between commands is configurable
+
 ## [0.0.11] - 2021-10-21
 ### Changed
 - Added warning to readme.
