@@ -6,6 +6,13 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
+## [0.0.10] - 2021-10-21
+### Changed
+- selected text won't be trimmed, user able to blank lines
+
+### Fixed
+- split lines using correct line ending sequence LF, CRLF
+
 ## [0.0.9] - 2021-10-20
 ### Added
 - option to run block of code line by line

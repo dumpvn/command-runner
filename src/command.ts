@@ -59,7 +59,7 @@ export default class Command {
         return cmd && replace(cmd, async str => {
             let [variable, args = ''] = str.split(':');
 
-            variable = variable.trim();
+            variable = variable.trim(); // 
             args = args.trim();
 
             switch (variable) {
@@ -128,13 +128,18 @@ export default class Command {
         }
 
         const command = cmd + ' ' + this.$files.join(' ');
-
+       
         // send a block of code usually causing terminal issue
         const text = await this.resolve(command);
         if (executeLineByLine) {
-            var texts = text.split("\n");
+            let texts = [];
+            if (vscode.window.activeTextEditor?.document.eol === vscode.EndOfLine.LF) {
+                texts = text.split("\n");
+            } else {
+                texts = text.split("\r\n");
+            }
             for(var i in texts) { 
-                terminal.sendText(texts[i], false); // send line by line
+                terminal.sendText(texts[i], true); // send line by line
             }
             terminal.sendText("", true); // final enter
         } else {

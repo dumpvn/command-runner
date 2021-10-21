@@ -147,7 +147,8 @@ export default () => cache({
         const selections = this.selections();
 
         if (selections && selections.length && document) {
-            return selections.map(sl => document.getText(sl)).join('\n').trim();
+            // return selections.map(sl => document.getText(sl)).join('\n').trim();
+            return selections.map(sl => document.getText(sl)).join('\n'); // no trim
         }
 
         return '';
