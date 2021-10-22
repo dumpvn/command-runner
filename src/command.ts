@@ -15,6 +15,7 @@ export type TerminalOptions = Partial<vscode.TerminalOptions> & {
     executeLineByLine?: boolean;
     replaceTemplate?: boolean;
     commandDelay?: number;
+    autoScrollToBottom?: boolean;
     autoFocus?: boolean;
     autoClear?: boolean;
     sorted?: string[];
@@ -116,7 +117,7 @@ export default class Command {
 
 
     public async execute(cmd: string, options?: TerminalOptions) {
-        const { commandDelay, replaceTemplate, executeLineByLine, autoClear, autoFocus, ...terminalOptions }: TerminalOptions = {
+        const { autoScrollToBottom, commandDelay, replaceTemplate, executeLineByLine, autoClear, autoFocus, ...terminalOptions }: TerminalOptions = {
             ...this.$accessor.config('command-runner.terminal'),
             ...options,
             hideFromUser: false,
@@ -156,6 +157,10 @@ export default class Command {
             terminal.sendText("", true); // final enter
         } else {
             terminal.sendText(text, true);
+        }
+
+        if (autoScrollToBottom) {
+            await vscode.commands.executeCommand('workbench.action.terminal.scrollToBottom');
         }
         
         console.log('--> Run Command:', command);

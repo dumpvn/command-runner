@@ -6,6 +6,11 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
+## [0.0.13] - 2021-10-22
+### Added
+- option to auto scroll to bottom after executing command
+
+
 ## [0.0.12] - 2021-10-21
 ### Added
 - option to disable replace template
