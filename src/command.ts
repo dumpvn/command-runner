@@ -22,17 +22,23 @@ export type TerminalOptions = Partial<vscode.TerminalOptions> & {
 };
 
 
+/* create or activate current terminal window */
 function createTerminal(options: vscode.TerminalOptions) {
     const { window } = vscode;
     const { name } = options;
-
+    
     if (name && typeof name === 'string') {
         return (
             window.terminals.find(term => term.name === name) ||
             window.createTerminal(options)
         );
     }
-
+    /* there are cases that the terminal is there, however, it is not active and winodw.activeTerminal is undefined 
+    to avoid creating another terminal, the terminals array is checked and if there is 1 and only 1, we will use it
+    */
+    if (window.terminals.length === 1) {
+        return window.terminals[0];
+    }
     return window.activeTerminal || window.createTerminal(options);
 }
 

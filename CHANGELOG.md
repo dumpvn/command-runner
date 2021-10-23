@@ -4,7 +4,9 @@ All notable changes to the "command-runner" extension will be documented in this
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
-## [Unreleased]
+## [0.0.14] - 2021-10-23
+### Fixed
+- Fixed case that there is one inactive terminal and causing creating another terminal
 
 ## [0.0.13] - 2021-10-22
 ### Added
