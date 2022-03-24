@@ -1,5 +1,8 @@
 # VSCode Command Runner
 
+sff command runner
+sff vscode ext
+
 WARN!!!
 
 don't use this extension, it is for my personal learning!!!

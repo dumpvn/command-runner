@@ -2,7 +2,7 @@
     "name": "command-runner",
     "displayName": "command runner",
     "description": "command runner",
-    "version": "0.0.14",
+    "version": "0.0.15",
     "icon": "resource/powershell_128px.png",
     "repository": {
         "type": "git",
@@ -108,7 +108,8 @@
                 "command-runner.commands": {
                     "type": "object",
                     "default": {
-                        "echo": "echo 'this is a test command: ${workspaceFolder}'"
+                        "lcmp": "lcmp",
+                        "rcmp": "rcmp"
                     },
                     "description": "Set the custom command to run.",
                     "scope": "resource"
