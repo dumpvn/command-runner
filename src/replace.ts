@@ -2,11 +2,11 @@
 
 // custom like ${{env:REPOS_HOME}}
 const regexp = /\$\{\{(.*?)\}\}/g;
+
 // DOS like %REPOS_HOME%
 const regexp2 = /%(.*?)%/g;
 
 async function replace(str: string, handler: (matched: string) => string | Promise<string>): Promise<string> {
-
 
     if (str) {
         

@@ -1,10 +1,7 @@
 'use strict';
 
-
 /* 
-
 start https://stackoverflow.com/questions/51936369/what-is-the-record-type-in-typescript
-
 */
 export default function cache<T extends object>(target: T): T {
 

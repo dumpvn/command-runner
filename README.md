@@ -1,7 +1,23 @@
+
+- [VSCode Command Runner](#vscode-command-runner)
+  - [Features](#features)
+  - [Extension Settings](#extension-settings)
+  - [Key Binding](#key-binding)
+  - [Terminal Options](#terminal-options)
+  - [Predefined Variable](#predefined-variable)
+  - [Usages](#usages)
+
+
+```powershell
+sff vsce command runner
+sff vscode ext
+
+# vscode send text to terminal
+sth terminal.sendText
+```
+
 # VSCode Command Runner
 
-sff command runner
-sff vscode ext
 
 WARN!!!
 

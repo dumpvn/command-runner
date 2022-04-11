@@ -4,6 +4,11 @@ All notable changes to the "command-runner" extension will be documented in this
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.0.16] - 2022-04-11
+### Added
+- comment command
+
+
 ## [0.0.15] - 2022-03-24
 ### Added
 - lcmp and rcmp

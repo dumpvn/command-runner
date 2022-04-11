@@ -33,6 +33,7 @@ function createTerminal(options: vscode.TerminalOptions) {
             window.createTerminal(options)
         );
     }
+
     /* there are cases that the terminal is there, however, it is not active and winodw.activeTerminal is undefined 
     to avoid creating another terminal, the terminals array is checked and if there is 1 and only 1, we will use it
     */
@@ -59,11 +60,10 @@ export default class Command {
         file && this.$files.push(JSON.stringify(file));
     }
 
-    /* change the replace template to ${{xxx}} to make it work for variable in bash shell e.g.
-    BUCKET_ID=$(dd if=/dev/random bs=8 count=1 2>/dev/null | od -An -tx1 | tr -d ' \t\n')
-    echo ${BUCKET_ID} # should work for bash shell
-    echo ${{currentLineText}}
-    */
+    // change the replace template to ${{xxx}} to make it work for variable in bash shell
+    // e.g. BUCKET_ID=$(dd if=/dev/random bs=8 count=1 2>/dev/null | od -An -tx1 | tr -d ' \t\n')
+    // echo ${BUCKET_ID} # should work for bash shell
+    // echo ${{currentLineText}}
     public async resolve(cmd: string): Promise<string> {
         return cmd && replace(cmd, async str => {
             let [variable, args = ''] = str.split(':');
@@ -115,6 +115,7 @@ export default class Command {
             if (cmd) {
                 await this.execute(commands[cmd], options);
             }
+
         } catch (err) {
             // do nothings;
         }
@@ -146,9 +147,14 @@ export default class Command {
 
         // send a block of code usually causing terminal issue
         let text = command;
+
+        // vscode user option to enable or disable
         if (replaceTemplate) {
             text = await this.resolve(command);
         }
+
+        // vscode user option to enable or disable 
+        // the selected block will be executed line by line
         if (executeLineByLine) {
             let texts = [];
             if (vscode.window.activeTextEditor?.document.eol === vscode.EndOfLine.LF) {
@@ -156,12 +162,46 @@ export default class Command {
             } else {
                 texts = text.split("\r\n");
             }
+
             for(var i in texts) { 
                 terminal.sendText(texts[i], true); // send line by line
                 await delay(commandDelay ?? 50);
             }
             terminal.sendText("", true); // final enter
         } else {
+            // vscode terminal sendText
+            // typescript string starts with #
+            // typescript search and replace string regularexpression
+            // var searchPattern = new RegExp('^\s*#+', 'i');
+            // if (searchPattern.test(text)) {
+            // }
+
+            // # key words
+            text = text.replace(/^\s*#+(.*)/, 'comment $1')
+            // // key words
+            text = text.replace(/^\s*\/\/+(.*)/, 'comment $1')
+            
+            /** key words */
+            text = text.replace(/^\s*\/\*+\s*(.*)(\s*\*+\/)/, 'comment $1')
+
+            /** key words
+             */
+            text = text.replace(/^\s*\/\*+\s*(.*)/, 'comment $1')
+
+            // <# key words #>
+            text = text.replace(/^\s*\<#\s*(.*)\s*#\>/, 'comment $1')
+
+            // <# key words
+            text = text.replace(/^\s*\<#\s*(.*)/, 'comment $1')
+
+            // -- key words
+            text = text.replace(/^\s*--\s*(.*)/, 'comment $1')
+
+            // <!-- key words -->
+            text = text.replace(/^\s*\<!--\s*(.*)\s*--\>/, 'comment $1')
+            // <!-- key words
+            text = text.replace(/^\s*\<!--\s*(.*)/, 'comment $1')
+
             terminal.sendText(text, true);
         }
 
