@@ -194,13 +194,17 @@ export default class Command {
             // <# key words
             text = text.replace(/^\s*\<#\s*(.*)/, 'comment $1')
 
-            // -- key words
-            text = text.replace(/^\s*--\s*(.*)/, 'comment $1')
+            // -- key words || - key words
+            text = text.replace(/^\s*--*\s*(.*)/, 'comment $1')
 
             // <!-- key words -->
             text = text.replace(/^\s*\<!--\s*(.*)\s*--\>/, 'comment $1')
+
             // <!-- key words
             text = text.replace(/^\s*\<!--\s*(.*)/, 'comment $1')
+
+            // ** key words || * key words
+            text = text.replace(/^\s*\*\**\s*(.*)/, 'comment $1')
 
             terminal.sendText(text, true);
         }

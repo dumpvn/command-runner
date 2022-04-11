@@ -1,4 +1,5 @@
 
+- [up and running](#up-and-running)
 - [VSCode Command Runner](#vscode-command-runner)
   - [Features](#features)
   - [Extension Settings](#extension-settings)
@@ -8,7 +9,13 @@
   - [Usages](#usages)
 
 
+# up and running
 ```powershell
+npm install
+```
+
+```powershell
+
 sff vsce command runner
 sff vscode ext
 

@@ -4,6 +4,10 @@ All notable changes to the "command-runner" extension will be documented in this
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.0.17] - 2022-04-11
+### Added
+- comment command / support -, *
+
 ## [0.0.16] - 2022-04-11
 ### Added
 - comment command
