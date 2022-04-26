@@ -7,6 +7,7 @@
   - [Terminal Options](#terminal-options)
   - [Predefined Variable](#predefined-variable)
   - [Usages](#usages)
+- [showQuickPick allow new value](#showquickpick-allow-new-value)
 
 
 # up and running
@@ -144,3 +145,33 @@ or
 * or press `F1` and then select/type `Run Command` or `Run In Terminal`,
 * or right click the Text Editor and then click `Run Command` to select custom command in editor context menu
 * or right click the Text Editor and then click `Run In Terminal` to run selected content as shell command in editor context menu
+
+
+
+
+# showQuickPick allow new value
+```typescript
+const choices = ['a', 'b']
+
+async function getUserSelectdValue() {
+    return new Promise((resolve) => {
+        const quickPick = window.createQuickPick();
+        quickPick.items = choices.map(choice => ({ label: choice }));
+
+        quickPick.title = 'Choose your favorite value:'
+
+        quickPick.onDidChangeValue(() => {
+            // INJECT user values into proposed values
+            if (!choices.includes(quickPick.value)) quickPick.items = [quickPick.value, ...choices].map(label => ({ label }))
+        })
+
+        quickPick.onDidAccept(() => {
+            const selection = quickPick.activeItems[0]
+            resolve(selection.label)
+            quickPick.hide()
+        })
+        quickPick.show();
+    })
+}
+
+```
