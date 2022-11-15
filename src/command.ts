@@ -16,6 +16,7 @@ export type TerminalOptions = Partial<vscode.TerminalOptions> & {
     replaceTemplate?: boolean;
     commandDelay?: number;
     autoScrollToBottom?: boolean;
+    sendRawText?: boolean;
     autoFocus?: boolean;
     autoClear?: boolean;
     sorted?: string[];
@@ -124,7 +125,7 @@ export default class Command {
 
 
     public async execute(cmd: string, options?: TerminalOptions) {
-        const { autoScrollToBottom, commandDelay, replaceTemplate, executeLineByLine, autoClear, autoFocus, ...terminalOptions }: TerminalOptions = {
+        const { autoScrollToBottom, sendRawText, commandDelay, replaceTemplate, executeLineByLine, autoClear, autoFocus, ...terminalOptions }: TerminalOptions = {
             ...this.$accessor.config('command-runner.terminal'),
             ...options,
             hideFromUser: false,
@@ -176,36 +177,41 @@ export default class Command {
             // if (searchPattern.test(text)) {
             // }
 
-            // # key words
-            text = text.replace(/^\s*#+(.*)/, 'comment $1')
-            // // key words
-            text = text.replace(/^\s*\/\/+(.*)/, 'comment $1')
+            if (sendRawText) {
+                text = text
+            } else {
+                // # key words
+                text = text.replace(/^\s*#+(.*)/, 'comment $1')
+                // // key words
+                text = text.replace(/^\s*\/\/+(.*)/, 'comment $1')
+
+                /** key words */
+                text = text.replace(/^\s*\/\*+\s*(.*)(\s*\*+\/)/, 'comment $1')
+
+                /** key words
+                 */
+                text = text.replace(/^\s*\/\*+\s*(.*)/, 'comment $1')
+
+                // <# key words #>
+                text = text.replace(/^\s*\<#\s*(.*)\s*#\>/, 'comment $1')
+
+                // <# key words
+                text = text.replace(/^\s*\<#\s*(.*)/, 'comment $1')
+
+                // -- key words || - key words
+                text = text.replace(/^\s*--*\s*(.*)/, 'comment $1')
+
+                // <!-- key words -->
+                text = text.replace(/^\s*\<!--\s*(.*)\s*--\>/, 'comment $1')
+
+                // <!-- key words
+                text = text.replace(/^\s*\<!--\s*(.*)/, 'comment $1')
+
+                // ** key words || * key words
+                text = text.replace(/^\s*\*\**\s*(.*)/, 'comment $1')
+
+            }
             
-            /** key words */
-            text = text.replace(/^\s*\/\*+\s*(.*)(\s*\*+\/)/, 'comment $1')
-
-            /** key words
-             */
-            text = text.replace(/^\s*\/\*+\s*(.*)/, 'comment $1')
-
-            // <# key words #>
-            text = text.replace(/^\s*\<#\s*(.*)\s*#\>/, 'comment $1')
-
-            // <# key words
-            text = text.replace(/^\s*\<#\s*(.*)/, 'comment $1')
-
-            // -- key words || - key words
-            text = text.replace(/^\s*--*\s*(.*)/, 'comment $1')
-
-            // <!-- key words -->
-            text = text.replace(/^\s*\<!--\s*(.*)\s*--\>/, 'comment $1')
-
-            // <!-- key words
-            text = text.replace(/^\s*\<!--\s*(.*)/, 'comment $1')
-
-            // ** key words || * key words
-            text = text.replace(/^\s*\*\**\s*(.*)/, 'comment $1')
-
             terminal.sendText(text, true);
         }
 
