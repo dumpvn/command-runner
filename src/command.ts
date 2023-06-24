@@ -67,7 +67,11 @@ export default class Command {
     // echo ${{currentLineText}}
     public async resolve(cmd: string): Promise<string> {
         return cmd && replace(cmd, async str => {
-            let [variable, args = ''] = str.split(':');
+            // env:xxx
+            // config:yyy
+            // input:zzz
+            // command:blah blah blah
+            let [variable, args = ''] = str.split(':'); 
 
             variable = variable.trim(); // 
             args = args.trim();
@@ -131,6 +135,21 @@ export default class Command {
             hideFromUser: false,
         };
 
+        const command = cmd + ' ' + this.$files.join(' ');
+       
+        function delay(ms: number) {
+            return new Promise( resolve => setTimeout(resolve, ms) );
+        }
+
+        // send a block of code usually causing terminal issue
+        let text = command;
+
+        /* user can specify terminal name that he wants to run */
+        const regexPattern = /# term (\w+)$/;
+        const match = text.match(regexPattern);
+        if (match) {
+            terminalOptions.name = match[1];
+        }
         const terminal = createTerminal(terminalOptions);
         if (autoFocus && terminal !== vscode.window.activeTerminal) {
             terminal.show();
@@ -140,14 +159,6 @@ export default class Command {
             await vscode.commands.executeCommand('workbench.action.terminal.clear');
         }
 
-        const command = cmd + ' ' + this.$files.join(' ');
-       
-        function delay(ms: number) {
-            return new Promise( resolve => setTimeout(resolve, ms) );
-        }
-
-        // send a block of code usually causing terminal issue
-        let text = command;
 
         // vscode user option to enable or disable
         if (replaceTemplate) {

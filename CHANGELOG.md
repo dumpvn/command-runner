@@ -4,6 +4,10 @@ All notable changes to the "command-runner" extension will be documented in this
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.0.19] - 2023-06-24 10:04:52
+### Added
+- option to specify terminal name to be run
+
 ## [0.0.18] - 2022-11-15
 ### Added
 - send raw text option
