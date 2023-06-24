@@ -145,7 +145,7 @@ export default class Command {
         let text = command;
 
         /* user can specify terminal name that he wants to run */
-        const regexPattern = /# term (\w+)$/;
+        const regexPattern = /# term:(\w+)\s*$/;
         const match = text.match(regexPattern);
         if (match) {
             terminalOptions.name = match[1];
