@@ -1,13 +1,6 @@
-
 ```ps1
-npm install
-npm audit fix
-vsce package
-push vsce publish patch
 cf vsce-command-runner md
 ```
-
-
 
 
 - [up and running](#up-and-running)
