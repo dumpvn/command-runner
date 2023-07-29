@@ -1,4 +1,13 @@
 
+```ps1
+npm install
+push npm audit fix
+cf vsce-command-runner md
+```
+
+
+
+
 - [up and running](#up-and-running)
 - [VSCode Command Runner](#vscode-command-runner)
   - [Features](#features)
