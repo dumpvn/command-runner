@@ -1,7 +1,9 @@
 
 ```ps1
 npm install
-push npm audit fix
+npm audit fix
+vsce package
+push vsce publish patch
 cf vsce-command-runner md
 ```
 
