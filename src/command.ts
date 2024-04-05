@@ -144,7 +144,7 @@ export default class Command {
         // send a block of code usually causing terminal issue
         let text = command;
 
-        /* user can specify terminal name that he wants to run */
+        /* user can specify terminal name that he wants to run with comment # term:<name> in the end */
         const regexPattern = /# term:(\w+)\s*$/;
         const match = text.match(regexPattern);
         if (match) {
@@ -191,12 +191,23 @@ export default class Command {
             if (sendRawText) {
                 text = text
             } else {
-                // # key words
-                text = text.replace(/^\s*#+(.*)/, 'comment $1')
-                // // key words
+                //                                          # <...>
+                //                                          and not #r "nuget: <...>"
+                if (text.match(/^#r\s+"nuget:/)) {;}
+                else if (text.match(/^#r\s+"sdk:/)) {;}
+                else if (text.match(/^#load\s+/)) {;}
+                else if (text.match(/^#reset\s*$/)) {;}
+                else if (text.match(/^#cls\s*$/)) {;}
+                else if (text.match(/^#exit\s*$/)) {;}
+                else if (text.match(/^#nullable\s+/)) {;}
+                else {
+                    text = text.replace(/^\s*#+(.*)/, 'comment $1')
+                }
+                
+                //                                          // <...>
                 text = text.replace(/^\s*\/\/+(.*)/, 'comment $1')
 
-                /** key words */
+                //                                          /** <...> */
                 text = text.replace(/^\s*\/\*+\s*(.*)(\s*\*+\/)/, 'comment $1')
 
                 /** key words
@@ -209,7 +220,8 @@ export default class Command {
                 // <# key words
                 text = text.replace(/^\s*\<#\s*(.*)/, 'comment $1')
 
-                // -- key words || - key words
+                //                                      SQL -- key words 
+                //                                      Markdown - key words
                 text = text.replace(/^\s*--*\s*(.*)/, 'comment $1')
 
                 // <!-- key words -->
@@ -218,9 +230,8 @@ export default class Command {
                 // <!-- key words
                 text = text.replace(/^\s*\<!--\s*(.*)/, 'comment $1')
 
-                // ** key words || * key words
+                //                                      Markdown ** key words || * key words
                 text = text.replace(/^\s*\*\**\s*(.*)/, 'comment $1')
-
             }
             
             terminal.sendText(text, true);
