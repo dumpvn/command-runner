@@ -29,6 +29,9 @@ export const variableMap = {
     platform: 1,
     currentLineText: 1,
     uuid: 1,
+    killme: 1,
+    killme1: 1,
+    killme2: 1,
 };
 export type VariableScope = keyof typeof variableMap;
 

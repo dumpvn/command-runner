@@ -207,6 +207,27 @@ export default () => cache({
             const v = c === 'x' ? r : (r & 0x3 | 0x8);
             return v.toString(16);
         });
+    },
+    killme(): string {
+        const killme = vscode.window.terminals.find(term => term.name === 'killme');
+        if (killme) {
+            killme.dispose();
+        }
+        return '';
+    },
+    killme1(): string {
+        const killme = vscode.window.terminals.find(term => term.name === 'killme1');
+        if (killme) {
+            killme.dispose();
+        }
+        return '';
+    },
+    killme2(): string {
+        const killme = vscode.window.terminals.find(term => term.name === 'killme2');
+        if (killme) {
+            killme.dispose();
+        }
+        return '';
     }
 });
 

@@ -150,6 +150,11 @@ export default class Command {
         if (match) {
             terminalOptions.name = match[1];
         }
+
+        
+
+
+
         const terminal = createTerminal(terminalOptions);
         if (autoFocus && terminal !== vscode.window.activeTerminal) {
             terminal.show();
