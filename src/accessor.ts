@@ -28,6 +28,7 @@ export const variableMap = {
     tmpdir: 1,
     platform: 1,
     currentLineText: 1,
+    uuid: 1,
 };
 export type VariableScope = keyof typeof variableMap;
 
