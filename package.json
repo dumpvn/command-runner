@@ -2,7 +2,7 @@
     "name": "command-runner",
     "displayName": "command runner",
     "description": "command runner",
-    "version": "0.0.26",
+    "version": "0.0.27",
     "icon": "resource/powershell_128px.png",
     "repository": {
         "type": "git",
@@ -114,8 +114,8 @@
                 "command-runner.commands": {
                     "type": "object",
                     "default": {
-                        "lcmp": "lcmp",
-                        "rcmp": "rcmp"
+                        "current task": "t",
+                        "last edit file": "td 1"
                     },
                     "description": "Set the custom command to run.",
                     "scope": "resource"
