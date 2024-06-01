@@ -4,6 +4,9 @@
 const regexp = /\$\{\{(.*?)\}\}/g;
 
 // DOS like %REPOS_HOME%
+/* 
+"%REPOS_HOME%"
+*/
 const regexp2 = /%(.*?)%/g;
 
 async function replace(str: string, handler: (matched: string) => string | Promise<string>): Promise<string> {
@@ -36,7 +39,8 @@ async function replace2(str: string, handler: (matched: string) => string | Prom
 
         while (matched) {
             result += str.slice(idx, matched.index);
-            result += await handler('env:' + matched[1]) || '';
+            // env:REPOS_HOME
+            result += await handler('env:' + matched[1]) || `%${matched[1]}%`;
             idx = matched.index + matched[0].length;
             matched = regexp2.exec(str);
         }

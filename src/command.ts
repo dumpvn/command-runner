@@ -199,6 +199,7 @@ export default class Command {
                 //                                          # <...>
                 //                                          and not #r "nuget: <...>"
                 if (text.match(/^#r\s+"nuget:/)) {;}
+                else if (text.match(/^#r\s+/)) {;}
                 else if (text.match(/^#r\s+"sdk:/)) {;}
                 else if (text.match(/^#load\s+/)) {;}
                 else if (text.match(/^#reset\s*$/)) {;}
