@@ -228,6 +228,10 @@ export default () => cache({
             killme.dispose();
         }
         return '';
+    },
+    kat(): string {
+        vscode.window.terminals.forEach(term => term.dispose());
+        return '';
     }
 });
 

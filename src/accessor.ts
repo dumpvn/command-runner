@@ -32,6 +32,7 @@ export const variableMap = {
     killme: 1,
     killme1: 1,
     killme2: 1,
+    kat: 1, // kill all terminals
 };
 export type VariableScope = keyof typeof variableMap;
 
