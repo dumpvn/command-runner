@@ -4,6 +4,7 @@
     "description": "command runner",
     "version": "0.0.29",
     "icon": "resource/powershell_128px.png",
+    "license": "MIT",
     "repository": {
         "type": "git",
         "url": "https://github.com/dumpvn/command-runner.git"
