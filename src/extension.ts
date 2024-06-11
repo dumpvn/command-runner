@@ -30,17 +30,36 @@ export function activate(context: vscode.ExtensionContext): void {
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
-	// let disposable = vscode.commands.registerCommand('command-runner.helloWorld', () => {
-	// 	// The code you place here will be executed every time your command is executed
-	// 	// Display a message box to the user
-	// 	vscode.window.showInformationMessage('Hello World from command-runner!');
-	// });
+
+	let disposable = vscode.commands.registerCommand('command-runner.switchTerminal', () => {
+		// The code you place here will be executed every time your command is executed
+		// Display a message box to the user
+		vscode.window.showInformationMessage('Hello World from command-runner!');
+	});
 
 	// context.subscriptions.push(disposable);
 
 
 	context.subscriptions.push(
         vscode.commands.registerCommand('command-runner.runInTerminal', ({ terminal }: CommandOptions = {}) => {
+
+
+
+            const activeEditor = vscode.window.activeTextEditor;
+            if (activeEditor) {
+                var {text} = activeEditor.document.lineAt(activeEditor.selection.active.line);
+                text = text.trim();
+
+                // if text matches 'switchTerminal curl', then switch terminal to terminal with name curl
+                if (text.startsWith('switchTerminal')) {
+                    const terminalName = text.split(' ')[1];
+                    const command = new Command(context);
+                    command.switchTerminal(terminalName);
+                    return;
+                }
+            }
+
+
             const command = new Command(context);
 
             if (typeof terminal === 'string') {

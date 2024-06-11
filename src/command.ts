@@ -253,4 +253,17 @@ export default class Command {
     public async executeSelectText(options?: TerminalOptions) {
         await this.execute(this.$accessor.variable('selectedTextSection') || this.$accessor.variable('currentLineText'), options);
     }
+
+    public async switchTerminal(terminalName: string) {
+        const { autoClear, autoFocus, ...terminalOptions }: TerminalOptions = {
+            ...this.$accessor.config('command-runner.terminal'),
+            hideFromUser: false,
+        };
+        terminalOptions.name = terminalName;
+       
+        const terminal = createTerminal(terminalOptions);
+        if (terminal !== vscode.window.activeTerminal) {
+            terminal.show(true);
+        }
+    }
 }
