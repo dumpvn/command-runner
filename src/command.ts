@@ -206,6 +206,12 @@ export default class Command {
                 else if (text.match(/^#cls\s*$/)) {;}
                 else if (text.match(/^#exit\s*$/)) {;}
                 else if (text.match(/^#nullable\s+/)) {;}
+                else if (text.match(/^\s*#+\s*(ref\s+.*)/)) {
+                    text = text.replace(/^\s*#+\s*(ref\s+.*)/, '$1')
+                }
+                else if (text.match(/^\s*\/\/+\s*(ref\s+.*)/)) {
+                    text = text.replace(/^\s*\/\/+\s*(ref\s+.*)/, '$1')
+                }
                 else {
                     text = text.replace(/^\s*#+(.*)/, 'comment $1')
                 }
