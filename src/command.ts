@@ -207,9 +207,8 @@ export default class Command {
                 else if (text.match(/^#exit\s*$/)) {;}
                 else if (text.match(/^#nullable\s+/)) {;}
 
-                
-                else if (text.match(/^\s*<?(#|\/|-)+\**\.\s*(.*)/)) {
-                    text = text.replace(/^\s*<?(#|\/|-)+\**\.\s*(.*)/, 'refsave $2')
+                else if (text.match(/^\s*<?(#|\/|-)+\**\s*(.*)\./)) {
+                    text = text.replace(/^\s*<?(#|\/|-)+\**\s*(.*)\./, 'refsave $2')
                 }
                 //     ####   blablabla
                 else if (text.match(/^\s*<?(#|\/|-)+\**\s*(.*)/)) {
