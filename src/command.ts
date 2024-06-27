@@ -206,44 +206,48 @@ export default class Command {
                 else if (text.match(/^#cls\s*$/)) {;}
                 else if (text.match(/^#exit\s*$/)) {;}
                 else if (text.match(/^#nullable\s+/)) {;}
-                else if (text.match(/^\s*#+\s*(ref\s+.*)/)) {
-                    text = text.replace(/^\s*#+\s*(ref\s+.*)/, '$1')
+
+                
+                else if (text.match(/^\s*<?(#|\/|-)+\**\.\s*(.*)/)) {
+                    text = text.replace(/^\s*<?(#|\/|-)+\**\.\s*(.*)/, 'refsave $2')
                 }
-                else if (text.match(/^\s*\/\/+\s*(ref\s+.*)/)) {
-                    text = text.replace(/^\s*\/\/+\s*(ref\s+.*)/, '$1')
+                //     ####   blablabla
+                else if (text.match(/^\s*<?(#|\/|-)+\**\s*(.*)/)) {
+                    text = text.replace(/^\s*<?(#|\/|-)+\**\s*(.*)/, 'ref $2')
                 }
                 else {
-                    text = text.replace(/^\s*#+(.*)/, 'comment $1')
+                    // ^       ######     gci ls
+                    //text = text.replace(/^\s*(#|\/)+\s*(.*)/, 'ref $2')
                 }
                 
                 //                                          // <...>
-                text = text.replace(/^\s*\/\/+(.*)/, 'comment $1')
+                // text = text.replace(/^\s*\/\/+(.*)/, 'comment $1')
 
                 //                                          /** <...> */
-                text = text.replace(/^\s*\/\*+\s*(.*)(\s*\*+\/)/, 'comment $1')
+                // text = text.replace(/^\s*\/\*+\s*(.*)(\s*\*+\/)/, 'comment $1')
 
                 /** key words
                  */
-                text = text.replace(/^\s*\/\*+\s*(.*)/, 'comment $1')
+                // text = text.replace(/^\s*\/\*+\s*(.*)/, 'comment $1')
 
                 // <# key words #>
-                text = text.replace(/^\s*\<#\s*(.*)\s*#\>/, 'comment $1')
+                // text = text.replace(/^\s*\<#\s*(.*)\s*#\>/, 'comment $1')
 
                 // <# key words
-                text = text.replace(/^\s*\<#\s*(.*)/, 'comment $1')
+                // text = text.replace(/^\s*\<#\s*(.*)/, 'comment $1')
 
                 //                                      SQL -- key words 
                 //                                      Markdown - key words
-                text = text.replace(/^\s*--*\s*(.*)/, 'comment $1')
+                // text = text.replace(/^\s*--*\s*(.*)/, 'comment $1')
 
                 // <!-- key words -->
-                text = text.replace(/^\s*\<!--\s*(.*)\s*--\>/, 'comment $1')
+                // text = text.replace(/^\s*\<!--\s*(.*)\s*--\>/, 'comment $1')
 
                 // <!-- key words
-                text = text.replace(/^\s*\<!--\s*(.*)/, 'comment $1')
+                // text = text.replace(/^\s*\<!--\s*(.*)/, 'comment $1')
 
                 //                                      Markdown ** key words || * key words
-                text = text.replace(/^\s*\*\**\s*(.*)/, 'comment $1')
+                // text = text.replace(/^\s*\*\**\s*(.*)/, 'comment $1')
             }
             
             terminal.sendText(text, true);
