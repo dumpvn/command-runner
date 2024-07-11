@@ -206,6 +206,7 @@ export default class Command {
                 else if (text.match(/^#cls\s*$/)) {;}
                 else if (text.match(/^#exit\s*$/)) {;}
                 else if (text.match(/^#nullable\s+/)) {;}
+                else if (text.trim().match(/^\/exit/)) {;}
 
                 else if (text.match(/^\s*<?(#|\/|-)+\**\s*(.*)\./)) {
                     text = text.replace(/^\s*<?(#|\/|-)+\**\s*(.*)\./, 'refsave $2')

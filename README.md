@@ -1,18 +1,6 @@
 ```ps1
-cf vsce-command-runner md
+sf command runner md
 ```
-
-
-- [up and running](#up-and-running)
-- [VSCode Command Runner](#vscode-command-runner)
-  - [Features](#features)
-  - [Extension Settings](#extension-settings)
-  - [Key Binding](#key-binding)
-  - [Terminal Options](#terminal-options)
-  - [Predefined Variable](#predefined-variable)
-  - [Usages](#usages)
-- [showQuickPick allow new value](#showquickpick-allow-new-value)
-
 
 # up and running
 ```powershell
