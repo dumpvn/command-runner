@@ -157,8 +157,9 @@ export default class Command {
             // copy the chat message match[1] to the clipboard
             await vscode.env.clipboard.writeText(chatmatch[1]);
             await vscode.commands.executeCommand('workbench.action.terminal.chat.focusInput');
+            await delay(100);
             await vscode.commands.executeCommand('editor.action.clipboardPasteAction');
-            await vscode.commands.executeCommand('workbench.action.terminal.chat.makeRequest');
+            // await vscode.commands.executeCommand('workbench.action.terminal.chat.makeRequest');
             return;
         }
 
