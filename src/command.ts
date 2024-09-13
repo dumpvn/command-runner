@@ -61,6 +61,7 @@ export default class Command {
         file && this.$files.push(JSON.stringify(file));
     }
 
+    
     // change the replace template to ${{xxx}} to make it work for variable in bash shell
     // e.g. BUCKET_ID=$(dd if=/dev/random bs=8 count=1 2>/dev/null | od -An -tx1 | tr -d ' \t\n')
     // echo ${BUCKET_ID} # should work for bash shell
@@ -85,6 +86,7 @@ export default class Command {
                     return await this.$accessor.input(args) || args;
                 case 'command':
                     args && vscode.commands.executeCommand(args);
+                    
                     return '';
                 default:
                     return this.$accessor.variable(variable as VariableScope);
@@ -144,16 +146,28 @@ export default class Command {
         // send a block of code usually causing terminal issue
         let text = command;
 
+        // vscode user option to enable or disable
+        if (replaceTemplate) {
+            text = await this.resolve(command);
+        }
+
+        const chatmatch = text.match(/^\s*chat (.*)$/);
+        if (chatmatch) {
+            await vscode.commands.executeCommand('workbench.action.chat.openInNewWindow');
+            // copy the chat message match[1] to the clipboard
+            await vscode.env.clipboard.writeText(chatmatch[1]);
+            await vscode.commands.executeCommand('workbench.action.terminal.chat.focusInput');
+            await vscode.commands.executeCommand('editor.action.clipboardPasteAction');
+            await vscode.commands.executeCommand('workbench.action.terminal.chat.makeRequest');
+            return;
+        }
+
         /* user can specify terminal name that he wants to run with comment # term:<name> in the end */
         const regexPattern = /# term:(\w+)\s*$/;
         const match = text.match(regexPattern);
         if (match) {
             terminalOptions.name = match[1];
         }
-
-        
-
-
 
         const terminal = createTerminal(terminalOptions);
         if (autoFocus && terminal !== vscode.window.activeTerminal) {
@@ -164,11 +178,6 @@ export default class Command {
             await vscode.commands.executeCommand('workbench.action.terminal.clear');
         }
 
-
-        // vscode user option to enable or disable
-        if (replaceTemplate) {
-            text = await this.resolve(command);
-        }
 
         // vscode user option to enable or disable 
         // the selected block will be executed line by line
@@ -250,6 +259,7 @@ export default class Command {
                 // text = text.replace(/^\s*\*\**\s*(.*)/, 'comment $1')
             }
             
+            // Send text to the terminal with adding a new line
             terminal.sendText(text, true);
         }
 
