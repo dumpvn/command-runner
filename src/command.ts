@@ -164,11 +164,12 @@ export default class Command {
         }
 
 
-        const cwsmatch = text.match(/^\s*cws (.*)$/);
-        if (cwsmatch) {
+        // # todo 
+        const todoMatch = text.match(/^\s*\/*\**#*\s*TODO:?\s+(.*)$/i);
+        if (todoMatch) {
             await vscode.commands.executeCommand('workbench.action.chat.openInNewWindow');
             // copy the chat message match[1] to the clipboard
-            await vscode.env.clipboard.writeText(`@workspace ${cwsmatch[1]}`);
+            await vscode.env.clipboard.writeText(`@workspace ${todoMatch[1]}`);
             // await vscode.commands.executeCommand('workbench.action.terminal.chat.focusInput');
             await delay(200);
             await vscode.commands.executeCommand('editor.action.clipboardPasteAction');
