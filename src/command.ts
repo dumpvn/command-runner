@@ -163,6 +163,19 @@ export default class Command {
             return;
         }
 
+
+        const cwsmatch = text.match(/^\s*cws (.*)$/);
+        if (cwsmatch) {
+            await vscode.commands.executeCommand('workbench.action.chat.openInNewWindow');
+            // copy the chat message match[1] to the clipboard
+            await vscode.env.clipboard.writeText(`@workspace ${cwsmatch[1]}`);
+            // await vscode.commands.executeCommand('workbench.action.terminal.chat.focusInput');
+            await delay(200);
+            await vscode.commands.executeCommand('editor.action.clipboardPasteAction');
+            // await vscode.commands.executeCommand('workbench.action.terminal.chat.makeRequest');
+            return;
+        }
+
         /* user can specify terminal name that he wants to run with comment # term:<name> in the end */
         const regexPattern = /# term:(\w+)\s*$/;
         const match = text.match(regexPattern);
