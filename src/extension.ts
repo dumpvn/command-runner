@@ -39,11 +39,48 @@ export function activate(context: vscode.ExtensionContext): void {
 
 	// context.subscriptions.push(disposable);
 
+    // todo implement command-runner.runChatCopilot command
+    context.subscriptions.push(
+        vscode.commands.registerCommand('command-runner.runChatCopilot', async () => {
+            const command = new Command(context);
+            const activeEditor = vscode.window.activeTextEditor;
+            if (activeEditor) {
+                let text = activeEditor.document.getText(activeEditor.selection);
+                if (!text) {
+                    text = activeEditor.document.lineAt(activeEditor.selection.active.line).text;
+                }
+                if (text) {
+
+                    // Remove single-line comments (//, #)
+                    text = text.replace(/^\s*\/\/\s*/, '').trim();
+                    text = text.replace(/^#\s*/, '').trim();
+
+                    // Remove multi-line comments (/* */)
+                    text = text.replace(/^\/\*\s*/, '').replace(/\s*\*\/$/, '').trim();
+
+
+                    text = text.replace(/^todo\s*/i, '').trim();
+
+                    // Prepend @workspace if text does not start with it
+                    if (!text.startsWith('@workspace')) {
+                        text = `@workspace ${text}`;
+                    }
+                    await vscode.commands.executeCommand('workbench.action.chat.openInNewWindow');
+                    await vscode.env.clipboard.writeText(text);
+                    await new Promise(resolve => setTimeout(resolve, 200)); // delay to ensure clipboard is ready
+                    await vscode.commands.executeCommand('editor.action.clipboardPasteAction');
+                } else {
+                    vscode.window.showInformationMessage('No text selected to run in Chat Copilot.');
+                }
+            } else {
+                vscode.window.showInformationMessage('No active editor found.');
+            }
+        })
+    );
+
 
 	context.subscriptions.push(
         vscode.commands.registerCommand('command-runner.runInTerminal', ({ terminal }: CommandOptions = {}) => {
-
-
 
             const activeEditor = vscode.window.activeTextEditor;
             if (activeEditor) {
@@ -89,6 +126,8 @@ export function activate(context: vscode.ExtensionContext): void {
             command.pick();
         })
     );
+
+
 
 }
 
