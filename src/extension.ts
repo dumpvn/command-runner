@@ -58,6 +58,8 @@ export function activate(context: vscode.ExtensionContext): void {
                     // Remove multi-line comments (/* */)
                     text = text.replace(/^\/\*\s*/, '').replace(/\s*\*\/$/, '').trim();
 
+                    // remove leading spaces and * if any
+                    text = text.replace(/^\s*\*\s*/, '').trim();
 
                     text = text.replace(/^todo\s*/i, '').trim();
 
