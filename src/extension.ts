@@ -15,7 +15,6 @@ export interface CommandOptions {
 }
 
 
-
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 // https://code.visualstudio.com/api/references/vscode-api 
@@ -30,16 +29,6 @@ export function activate(context: vscode.ExtensionContext): void {
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
-
-	let disposable = vscode.commands.registerCommand('command-runner.switchTerminal', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from command-runner!');
-	});
-
-	// context.subscriptions.push(disposable);
-
-    // todo implement command-runner.runChatCopilot command
     context.subscriptions.push(
         vscode.commands.registerCommand('command-runner.runChatCopilot', async () => {
             const command = new Command(context);
@@ -49,11 +38,12 @@ export function activate(context: vscode.ExtensionContext): void {
                 if (!text) {
                     text = activeEditor.document.lineAt(activeEditor.selection.active.line).text;
                 }
+
                 if (text) {
 
                     // Remove single-line comments (//, #)
                     text = text.replace(/^\s*\/\/\s*/, '').trim();
-                    text = text.replace(/^#\s*/, '').trim();
+                    text = text.replace(/^\s*#\s*/, '').trim();
 
                     // Remove multi-line comments (/* */)
                     text = text.replace(/^\/\*\s*/, '').replace(/\s*\*\/$/, '').trim();
@@ -61,15 +51,17 @@ export function activate(context: vscode.ExtensionContext): void {
                     // remove leading spaces and * if any
                     text = text.replace(/^\s*\*\s*/, '').trim();
 
-                    text = text.replace(/^todo\s*/i, '').trim();
+                    text = text.replace(/^todo:?\s*/i, '').trim();
 
-                    // Prepend @workspace if text does not start with it
-                    if (!text.startsWith('@workspace')) {
-                        text = `@workspace ${text}`;
+                    // Prepend #codebase if text does not start with it
+                    if (!text.startsWith('#codebase')) {
+                        text = `#codebase ${text}`;
                     }
                     await vscode.commands.executeCommand('workbench.action.chat.openInNewWindow');
+                    // Writes text into the clipboard.
                     await vscode.env.clipboard.writeText(text);
-                    await new Promise(resolve => setTimeout(resolve, 200)); // delay to ensure clipboard is ready
+                    // delay 200ms to ensure clipboard is ready
+                    await new Promise(resolve => setTimeout(resolve, 200)); 
                     await vscode.commands.executeCommand('editor.action.clipboardPasteAction');
                 } else {
                     vscode.window.showInformationMessage('No text selected to run in Chat Copilot.');
@@ -80,17 +72,14 @@ export function activate(context: vscode.ExtensionContext): void {
         })
     );
 
-
 	context.subscriptions.push(
         vscode.commands.registerCommand('command-runner.runInTerminal', ({ terminal }: CommandOptions = {}) => {
 
             const activeEditor = vscode.window.activeTextEditor;
             if (activeEditor) {
-                var {text} = activeEditor.document.lineAt(activeEditor.selection.active.line);
+                var { text } = activeEditor.document.lineAt(activeEditor.selection.active.line);
                 text = text.trim();
-
-                // if text matches 'switchTerminal curl', then switch terminal to terminal with name curl
-                if (text.startsWith('switchTerminal')) {
+                if (text.startsWith('term ')) {
                     const terminalName = text.split(' ')[1];
                     const command = new Command(context);
                     command.switchTerminal(terminalName);
@@ -128,9 +117,6 @@ export function activate(context: vscode.ExtensionContext): void {
             command.pick();
         })
     );
-
-
-
 }
 
 // this method is called when your extension is deactivated
