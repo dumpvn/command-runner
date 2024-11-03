@@ -54,8 +54,8 @@ export function activate(context: vscode.ExtensionContext): void {
                     text = text.replace(/^todo:?\s*/i, '').trim();
 
                     // Prepend #codebase if text does not start with it
-                    if (!text.startsWith('#codebase')) {
-                        text = `#codebase ${text}`;
+                    if (!text.startsWith('#editor')) {
+                        text = `#editor #codebase ${text}`;
                     }
                     await vscode.commands.executeCommand('workbench.action.chat.openInNewWindow');
                     // Writes text into the clipboard.
