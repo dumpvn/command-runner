@@ -53,10 +53,10 @@ export function activate(context: vscode.ExtensionContext): void {
 
                     text = text.replace(/^todo:?\s*/i, '').trim();
 
-                    // Prepend #editor if text does not start with it
-                    if (!text.startsWith('@workspace')) {
-                        text = `@workspace ${text}`;
-                    }
+                    // if (!text.startsWith('@workspace')) {
+                    //     text = `@workspace ${text}`;
+                    // }
+
                     await vscode.commands.executeCommand('workbench.action.chat.openInNewWindow');
                     // Writes text into the clipboard.
                     await vscode.env.clipboard.writeText(text);
