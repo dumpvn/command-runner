@@ -151,6 +151,15 @@ export default class Command {
             text = await this.resolve(command);
         }
 
+        if (text.startsWith('# ')) {
+            var aiTagmatch = text.match(/#(ola|gpt|gemini|copilot)/)
+            if (aiTagmatch) {                        
+                text = aiTagmatch[1] + text.replace('# ', ' ');
+            } else {
+                text = 'gpt' + text.replace('# ', ' ');
+            }
+        }
+
         const chatmatch = text.match(/^\s*chat (.*)$/);
         if (chatmatch) {
             await vscode.commands.executeCommand('workbench.action.chat.openInNewWindow');

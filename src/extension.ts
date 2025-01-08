@@ -84,8 +84,9 @@ export function activate(context: vscode.ExtensionContext): void {
                     const command = new Command(context);
                     command.switchTerminal(terminalName);
                     return;
-                }
+                }                
             }
+
 
 
             const command = new Command(context);
