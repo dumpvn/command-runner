@@ -115,8 +115,7 @@
                 "command-runner.commands": {
                     "type": "object",
                     "default": {
-                        "current task": "t",
-                        "last edit file": "td 1"
+                        "chatgpt": "chatgpt"
                     },
                     "description": "Set the custom command to run.",
                     "scope": "resource"

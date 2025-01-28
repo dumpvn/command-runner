@@ -120,9 +120,22 @@ export function activate(context: vscode.ExtensionContext): void {
     );
 
 	context.subscriptions.push(
-        vscode.commands.registerCommand('command-runner.run', (opts: CommandOptions = {}, files?: vscode.Uri[]) => {
+        vscode.commands.registerCommand('command-runner.run', async (opts: CommandOptions = {}, files?: vscode.Uri[]) => {
             const command = new Command(context);
             const cmd = opts.command || opts.cmd || '';
+
+            const activeEditor = vscode.window.activeTextEditor;
+            if (activeEditor) {
+                let text = activeEditor.document.getText(activeEditor.selection);
+                if (!text) {
+                    text = activeEditor.document.lineAt(activeEditor.selection.active.line).text;
+                }
+
+                if (!text || !text.trim()) {
+                } else {
+                    await vscode.env.clipboard.writeText(text);
+                }
+            }
 
             if (typeof opts.terminal === 'string') {
                 opts.terminal = { name: opts.terminal };
