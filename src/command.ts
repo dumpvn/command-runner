@@ -151,12 +151,14 @@ export default class Command {
             text = await this.resolve(command);
         }
 
-        if (text.startsWith('# ')) {
-            var aiTagmatch = text.match(/#(ola|gpt|gemini|copilot)/)
+        if (text.startsWith('# ') || text.startsWith('<#')) {
+            var aiTagmatch = text.match(/#(llm|ola|gpt|gemini|copilot)/)
             if (aiTagmatch) {                        
-                text = aiTagmatch[1] + text.replace('# ', ' ');
+                // text = aiTagmatch[1] + text.replace('# ', ' ');
+                text = aiTagmatch[1] + text.replace(/# |<# |#>/g, ' ');
             } else {
-                text = 'gpt' + text.replace('# ', ' ');
+                // text = 'llm' + text.replace('# ', ' ');
+                text = 'llm' + text.replace(/# |<#|#>/g, ' ');
             }
         }
 
