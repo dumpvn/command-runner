@@ -12,6 +12,7 @@ export const variableMap = {
     file: 1,
     fileBasename: 1,
     fileBasenameNoExtension: 1,
+    basename: 1,
     fileDirname: 1,
     fileExtname: 1,
     lineNumber: 1,

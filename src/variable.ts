@@ -72,6 +72,10 @@ export default () => cache({
         return this.file() && path.basename(this.file(), this.fileExtname());
     },
 
+    basename(): string {
+        return this.file() && path.basename(this.file(), this.fileExtname());
+    },
+
     fileDirname(): string {
         return this.file() && path.dirname(this.file());
     },
