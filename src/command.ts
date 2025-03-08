@@ -151,43 +151,7 @@ export default class Command {
             text = await this.resolve(command);
         }
 
-        if (text.startsWith('# ') || text.startsWith('<#')) {
-            var aiTagmatch = text.match(/#(llm|ola|gpt|gemini|copilot)/)
-            if (aiTagmatch) {                        
-                // text = aiTagmatch[1] + text.replace('# ', ' ');
-                text = aiTagmatch[1] + text.replace(/# |<# |#>/g, ' ');
-            } else {
-                // text = 'llm' + text.replace('# ', ' ');
-                text = 'llm' + text.replace(/# |<#|#>/g, ' ');
-            }
-        }
-
-        const chatmatch = text.match(/^\s*chat (.*)$/);
-        if (chatmatch) {
-            await vscode.commands.executeCommand('workbench.action.chat.openInNewWindow');
-            // copy the chat message match[1] to the clipboard
-            await vscode.env.clipboard.writeText(chatmatch[1]);
-            // await vscode.commands.executeCommand('workbench.action.terminal.chat.focusInput');
-            await delay(200);
-            await vscode.commands.executeCommand('editor.action.clipboardPasteAction');
-            // await vscode.commands.executeCommand('workbench.action.terminal.chat.makeRequest');
-            return;
-        }
-
-
-        // # todo 
-        const todoMatch = text.match(/^\s*\/*\**#*\s*TODO:?\s+(.*)$/i);
-        if (todoMatch) {
-            await vscode.commands.executeCommand('workbench.action.chat.openInNewWindow');
-            // copy the chat message match[1] to the clipboard
-            await vscode.env.clipboard.writeText(`@workspace ${todoMatch[1]}`);
-            // await vscode.commands.executeCommand('workbench.action.terminal.chat.focusInput');
-            await delay(200);
-            await vscode.commands.executeCommand('editor.action.clipboardPasteAction');
-            // await vscode.commands.executeCommand('workbench.action.terminal.chat.makeRequest');
-            return;
-        }
-
+       
         /* user can specify terminal name that he wants to run with comment # term:<name> in the end */
         const regexPattern = /# term:(\w+)\s*$/;
         const match = text.match(regexPattern);
@@ -219,73 +183,9 @@ export default class Command {
                 terminal.sendText(texts[i], true); // send line by line
                 await delay(commandDelay ?? 50);
             }
+
             terminal.sendText("", true); // final enter
         } else {
-            // vscode terminal sendText
-            // typescript string starts with #
-            // typescript search and replace string regularexpression
-            // var searchPattern = new RegExp('^\s*#+', 'i');
-            // if (searchPattern.test(text)) {
-            // }
-
-            if (sendRawText) {
-                text = text
-            } else {
-                //                                          # <...>
-                //                                          and not #r "nuget: <...>"
-                if (text.match(/^#r\s+"nuget:/)) {;}
-                else if (text.match(/^#r\s+/)) {;}
-                else if (text.match(/^#r\s+"sdk:/)) {;}
-                else if (text.match(/^#load\s+/)) {;}
-                else if (text.match(/^#reset\s*$/)) {;}
-                else if (text.match(/^#cls\s*$/)) {;}
-                else if (text.match(/^#exit\s*$/)) {;}
-                else if (text.match(/^#nullable\s+/)) {;}
-                else if (text.trim().match(/^\/exit/)) {;}
-
-                else if (text.match(/^\s*<?(#|\/|-)+\**\s*(.*)\./)) {
-                    text = text.replace(/^\s*<?(#|\/|-)+\**\s*(.*)\./, 'refsave $2')
-                }
-                //     ####   blablabla
-                else if (text.match(/^\s*<?(#|\/|-)+\**\s*(.*)/)) {
-                    text = text.replace(/^\s*<?(#|\/|-)+\**\s*(.*)/, 'ref $2')
-                }
-                else {
-                    // ^       ######     gci ls
-                    //text = text.replace(/^\s*(#|\/)+\s*(.*)/, 'ref $2')
-                }
-                
-                //                                          // <...>
-                // text = text.replace(/^\s*\/\/+(.*)/, 'comment $1')
-
-                //                                          /** <...> */
-                // text = text.replace(/^\s*\/\*+\s*(.*)(\s*\*+\/)/, 'comment $1')
-
-                /** key words
-                 */
-                // text = text.replace(/^\s*\/\*+\s*(.*)/, 'comment $1')
-
-                // <# key words #>
-                // text = text.replace(/^\s*\<#\s*(.*)\s*#\>/, 'comment $1')
-
-                // <# key words
-                // text = text.replace(/^\s*\<#\s*(.*)/, 'comment $1')
-
-                //                                      SQL -- key words 
-                //                                      Markdown - key words
-                // text = text.replace(/^\s*--*\s*(.*)/, 'comment $1')
-
-                // <!-- key words -->
-                // text = text.replace(/^\s*\<!--\s*(.*)\s*--\>/, 'comment $1')
-
-                // <!-- key words
-                // text = text.replace(/^\s*\<!--\s*(.*)/, 'comment $1')
-
-                //                                      Markdown ** key words || * key words
-                // text = text.replace(/^\s*\*\**\s*(.*)/, 'comment $1')
-            }
-            
-            // Send text to the terminal with adding a new line
             terminal.sendText(text, true);
         }
 

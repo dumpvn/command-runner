@@ -40,48 +40,9 @@ export function activate(context: vscode.ExtensionContext): void {
                     text = activeEditor.document.lineAt(activeEditor.selection.active.line).text;
                 }
 
-                // check if text is empty or whitespace
-                if (!text || !text.trim()) {
-                    let documentText = activeEditor.document.getText();
-                    let promptDoc = vscode.workspace.textDocuments.filter(doc => doc.fileName.endsWith('.prompt'))[0];
-                    let promptText = '';
-                    if (promptDoc) {
-                        promptText = promptDoc.getText();
-                    }
-
-                    // now concatenate the two texts: promptText + documentText
-                    text = promptText + '\n\n' + documentText;
-
-                    // await vscode.commands.executeCommand('workbench.action.chat.openInNewWindow');
-                    // // Writes text into the clipboard.
-                    // await vscode.env.clipboard.writeText(text);
-                    // // delay 200ms to ensure clipboard is ready
-                    // await new Promise(resolve => setTimeout(resolve, 200)); 
-                    // await vscode.commands.executeCommand('editor.action.clipboardPasteAction');
-                }
-
                 if (text) {
-
-                    // Remove single-line comments (//, #)
-                    // text = text.replace(/^\s*\/\/\s*/, '').trim();
-                    // text = text.replace(/^\s*#\s*/, '').trim();
-
-                    // Remove multi-line comments (/* */)
-                    // text = text.replace(/^\/\*\s*/, '').replace(/\s*\*\/$/, '').trim();
-
-                    // remove leading spaces and * if any
-                    // text = text.replace(/^\s*\*\s*/, '').trim();
-
-                    // text = text.replace(/^todo:?\s*/i, '').trim();
-
-                    // if (!text.startsWith('@workspace')) {
-                    //     text = `@workspace ${text}`;
-                    // }
-
                     await vscode.commands.executeCommand('workbench.action.chat.openInNewWindow');
-                    // Writes text into the clipboard.
                     await vscode.env.clipboard.writeText(text);
-                    // delay 200ms to ensure clipboard is ready
                     await new Promise(resolve => setTimeout(resolve, 200)); 
                     await vscode.commands.executeCommand('editor.action.clipboardPasteAction');
                 } else {
