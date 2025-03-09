@@ -59,17 +59,49 @@ export function activate(context: vscode.ExtensionContext): void {
 
             const activeEditor = vscode.window.activeTextEditor;
             if (activeEditor) {
-                var { text } = activeEditor.document.lineAt(activeEditor.selection.active.line);
+                let { text } = activeEditor.document.lineAt(activeEditor.selection.active.line);
                 text = text.trim();
                 if (text.startsWith('term ')) {
                     const terminalName = text.split(' ')[1];
                     const command = new Command(context);
                     command.switchTerminal(terminalName);
                     return;
-                }                
+                }
+
+                // Handle insert command
+                if (text.startsWith('ins ')) {
+                    const document = activeEditor.document;
+                    let currentLine = activeEditor.selection.active.line - 1;
+                
+                    // Step 1: Check if the line above "ins" is ```
+                    if (currentLine > 0 && document.lineAt(currentLine).text.trim() === '```') {
+                        let codeBlock = [];
+                        let foundOpeningBackticks = false;
+                        
+                        codeBlock.unshift(document.lineAt(currentLine).text); // Add to the block
+                        currentLine--;
+                    
+                        // Step 2: Traverse upwards to find the start of the code block
+                        while (currentLine >= 0) {
+                            const lineText = document.lineAt(currentLine).text;
+                    
+                            // If we find the opening backticks, stop
+                            if (lineText.trim().startsWith('```')) {
+                                if (foundOpeningBackticks) break;
+                                foundOpeningBackticks = true;
+                            }
+                    
+                            codeBlock.unshift(lineText); // Add to the block
+                            currentLine--;
+                        }
+                    
+                        // Step 3: Copy to clipboard if a block was found
+                        if (foundOpeningBackticks) {
+                            vscode.env.clipboard.writeText(codeBlock.join('\n'));
+                        }
+                    }
+                }
             }
-
-
 
             const command = new Command(context);
 
