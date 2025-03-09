@@ -87,11 +87,12 @@ export function activate(context: vscode.ExtensionContext): void {
                     
                             // If we find the opening backticks, stop
                             if (lineText.trim().startsWith('```')) {
-                                if (foundOpeningBackticks) break;
                                 foundOpeningBackticks = true;
                             }
                     
                             codeBlock.unshift(lineText); // Add to the block
+                            if (foundOpeningBackticks) break;
+
                             currentLine--;
                         }
                     
