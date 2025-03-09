@@ -72,6 +72,9 @@ export function activate(context: vscode.ExtensionContext): void {
                 if (text.startsWith('ins ')) {
                     const document = activeEditor.document;
                     let currentLine = activeEditor.selection.active.line - 1;
+                    while (currentLine > 0 && document.lineAt(currentLine).text.trim() !== '```') {
+                        currentLine--;
+                    }
                 
                     // Step 1: Check if the line above "ins" is ```
                     if (currentLine > 0 && document.lineAt(currentLine).text.trim() === '```') {
