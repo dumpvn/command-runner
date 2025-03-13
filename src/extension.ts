@@ -59,8 +59,26 @@ export function activate(context: vscode.ExtensionContext): void {
 
             const activeEditor = vscode.window.activeTextEditor;
             if (activeEditor) {
-                let { text } = activeEditor.document.lineAt(activeEditor.selection.active.line);
+                let text = activeEditor.document.getText(activeEditor.selection);
+                if (!text) {
+                    text = activeEditor.document.lineAt(activeEditor.selection.active.line).text;
+                }
+
                 text = text.trim();
+
+                if (text.startsWith('open ')) {
+                    const match = text.match(/open\s+(.+)/);
+                    if (match) {
+                        const filePath = match[1];
+                        const openPath = vscode.Uri.file(filePath);
+                        vscode.workspace.openTextDocument(openPath).then(doc => {
+                            vscode.window.showTextDocument(doc);
+                        });
+                    }
+                    return;
+                }
+
+
                 if (text.startsWith('term ')) {
                     const terminalName = text.split(' ')[1];
                     const command = new Command(context);
