@@ -123,6 +123,22 @@ export function activate(context: vscode.ExtensionContext): void {
                         }
                     }
                 }
+
+
+                /* search references
+                if text match '- [[something-here]]' then replace text with "sf something-here"
+                */
+                if (text.startsWith('- [[')) {
+                    const match = text.match(/- \[\[(.+)\]\]/);
+                    if (match) {
+                        const command = new Command(context);
+                        if (typeof terminal === 'string') {
+                            terminal = { name: terminal };
+                        }
+                        command.execute(`sf ${match[1]}`, terminal);
+                        return;
+                    }
+                }
             }
 
             const command = new Command(context);
