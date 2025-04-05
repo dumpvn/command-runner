@@ -66,8 +66,21 @@ export function activate(context: vscode.ExtensionContext): void {
 
                 text = text.trim();
 
-                if (text.startsWith('open ')) {
-                    const match = text.match(/open\s+(.+)/);
+                // if (text.startsWith('open ')) {
+                //     const match = text.match(/open\s+(.+)/);
+                //     if (match) {
+                //         const filePath = match[1];
+                //         const openPath = vscode.Uri.file(filePath);
+                //         vscode.workspace.openTextDocument(openPath).then(doc => {
+                //             vscode.window.showTextDocument(doc);
+                //         });
+                //     }
+                //     return;
+                // }
+
+                if (text.startsWith('open')) {
+                    const textNoQuotes = text.replace(/['"\(\)]/g, '');
+                    const match = textNoQuotes.match(/open\s*(.+)/);
                     if (match) {
                         const filePath = match[1];
                         const openPath = vscode.Uri.file(filePath);
