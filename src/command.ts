@@ -121,14 +121,13 @@ export default class Command {
             this.context.workspaceState.update('COMMAND_RUNNER_RECENT', [cmd, ...keys]);
             if (cmd) {
                 await this.execute(commands[cmd], options);
+
+                await vscode.commands.executeCommand('workbench.action.chat.open');
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                await vscode.commands.executeCommand('editor.action.clipboardPasteAction');
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                // await vscode.commands.executeCommand('type', { text: '\n' });
             }
-
-
-            await vscode.commands.executeCommand('workbench.action.chat.open');
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            await vscode.commands.executeCommand('editor.action.clipboardPasteAction');
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            // await vscode.commands.executeCommand('type', { text: '\n' });
 
 
         } catch (err) {
