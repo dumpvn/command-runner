@@ -41,10 +41,11 @@ export function activate(context: vscode.ExtensionContext): void {
                 }
 
                 if (text) {
-                    await vscode.commands.executeCommand('workbench.action.chat.openInNewWindow');
                     await vscode.env.clipboard.writeText(text);
-                    await new Promise(resolve => setTimeout(resolve, 200)); 
+                    await vscode.commands.executeCommand('workbench.action.chat.openInNewWindow');
+                    await new Promise(resolve => setTimeout(resolve, 1000)); 
                     await vscode.commands.executeCommand('editor.action.clipboardPasteAction');
+
                 } else {
                     vscode.window.showInformationMessage('No text selected to run in Chat Copilot.');
                 }
@@ -192,6 +193,16 @@ export function activate(context: vscode.ExtensionContext): void {
             if (cmd) {
                 return command.execute(command.commands[cmd] || cmd, opts.terminal);
             }
+
+
+
+            /* 
+            
+             await vscode.env.clipboard.writeText(text);
+                    await vscode.commands.executeCommand('workbench.action.chat.openInNewWindow');
+                    await new Promise(resolve => setTimeout(resolve, 1000)); 
+                    await vscode.commands.executeCommand('editor.action.clipboardPasteAction');
+            */
 
             command.pick();
         })

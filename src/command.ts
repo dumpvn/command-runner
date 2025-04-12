@@ -123,6 +123,14 @@ export default class Command {
                 await this.execute(commands[cmd], options);
             }
 
+
+            await vscode.commands.executeCommand('workbench.action.chat.open');
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            await vscode.commands.executeCommand('editor.action.clipboardPasteAction');
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            // await vscode.commands.executeCommand('type', { text: '\n' });
+
+
         } catch (err) {
             // do nothings;
         }
