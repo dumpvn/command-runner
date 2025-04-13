@@ -172,11 +172,15 @@ export function activate(context: vscode.ExtensionContext): void {
             const activeEditor = vscode.window.activeTextEditor;
             if (activeEditor) {
                 let text = activeEditor.document.getText(activeEditor.selection);
-                if (!text) {
-                    text = activeEditor.document.lineAt(activeEditor.selection.active.line).text;
-                }
+
+                // user need to select the text
+                // if (!text) {
+                //     text = activeEditor.document.lineAt(activeEditor.selection.active.line).text;
+                // }
 
                 if (!text || !text.trim()) {
+                    // clear clipboard
+                    await vscode.env.clipboard.writeText('');
                 } else {
                     await vscode.env.clipboard.writeText(text);
                 }
