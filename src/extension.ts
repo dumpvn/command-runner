@@ -41,17 +41,20 @@ export function activate(context: vscode.ExtensionContext): void {
                 }
 
                 if (text) {
+                    text = text.trim();
                     await vscode.env.clipboard.writeText(text);
-                    await vscode.commands.executeCommand('workbench.action.chat.openInNewWindow');
+                    await vscode.commands.executeCommand('workbench.action.chat.open');
                     await new Promise(resolve => setTimeout(resolve, 1000)); 
                     await vscode.commands.executeCommand('editor.action.clipboardPasteAction');
-
-                } else {
-                    vscode.window.showInformationMessage('No text selected to run in Chat Copilot.');
-                }
-            } else {
-                vscode.window.showInformationMessage('No active editor found.');
-            }
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                } 
+                // else {
+                //     vscode.window.showInformationMessage('No text selected to run in Chat Copilot.');
+                // }
+            } 
+            // else {
+            //     vscode.window.showInformationMessage('No active editor found.');
+            // }
         })
     );
 
