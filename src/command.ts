@@ -123,7 +123,17 @@ export default class Command {
                 await this.execute(commands[cmd], options);
 
                 await vscode.commands.executeCommand('workbench.action.chat.open');
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                await new Promise(resolve => setTimeout(resolve, 500));
+
+                // get clipboard text
+                const text = await vscode.env.clipboard.readText();
+                const resolvedText = await this.resolve(text);
+                if (resolvedText) {
+                    await vscode.env.clipboard.writeText(resolvedText);
+                } else {
+                    await vscode.env.clipboard.writeText(text);
+                }
+
                 await vscode.commands.executeCommand('editor.action.clipboardPasteAction');
                 await new Promise(resolve => setTimeout(resolve, 1000));
                 // await vscode.commands.executeCommand('type', { text: '\n' });
