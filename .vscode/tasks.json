@@ -1,12 +1,35 @@
 // See https://go.microsoft.com/fwlink/?LinkId=733558
 // for the documentation about the tasks.json format
+// backup: "problemMatcher": "$tsc-watch",
+
 {
 	"version": "2.0.0",
 	"tasks": [
 		{
 			"type": "npm",
 			"script": "watch",
-			"problemMatcher": "$tsc-watch",
+			
+			// https://stackoverflow.com/questions/44242048/how-can-i-prevent-vs-code-from-waiting-for-a-prelaunchtask-to-finish
+			// This task is run before some debug tasks.
+			// Problem is, it's a watch script, and since it never exits, VSCode
+			// complains. All this is needed so VSCode just lets it run.
+			"problemMatcher": [
+				{
+					"pattern": [
+						{
+						"regexp": ".",
+						"file": 1,
+						"location": 2,
+						"message": 3
+						}
+					],
+					"background": {
+						"activeOnStart": true,
+						"beginsPattern": ".",
+						"endsPattern": ".",
+					}
+				}
+			],
 			"isBackground": true,
 			"presentation": {
 				"reveal": "never"
