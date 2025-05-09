@@ -122,8 +122,10 @@ export default class Command {
             if (cmd) {
                 await this.execute(commands[cmd], options);
 
+                /* 
                 await vscode.commands.executeCommand('workbench.action.chat.open');
                 await new Promise(resolve => setTimeout(resolve, 500));
+                */
 
                 // get clipboard text
                 const text = await vscode.env.clipboard.readText();
@@ -134,9 +136,10 @@ export default class Command {
                     await vscode.env.clipboard.writeText(text);
                 }
 
-                await vscode.commands.executeCommand('editor.action.clipboardPasteAction');
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                // await vscode.commands.executeCommand('type', { text: '\n' });
+                // await vscode.commands.executeCommand('editor.action.clipboardPasteAction');
+                // await new Promise(resolve => setTimeout(resolve, 1000));
+
+                await this.execute("llm", options);
             }
 
 
