@@ -86,7 +86,6 @@ export default class Command {
                     return await this.$accessor.input(args) || args;
                 case 'command':
                     args && vscode.commands.executeCommand(args);
-                    
                     return '';
                 default:
                     return this.$accessor.variable(variable as VariableScope);
@@ -118,14 +117,15 @@ export default class Command {
                 keys, { placeHolder: 'Type or select command to run' }
             );
 
+
             this.context.workspaceState.update('COMMAND_RUNNER_RECENT', [cmd, ...keys]);
             if (cmd) {
-                await this.execute(commands[cmd], options);
+                let command = commands[cmd];
 
-                /* 
-                await vscode.commands.executeCommand('workbench.action.chat.open');
-                await new Promise(resolve => setTimeout(resolve, 500));
-                */
+                await this.execute(command, options);
+
+                /* await vscode.commands.executeCommand('workbench.action.chat.open'); */
+               await new Promise(resolve => setTimeout(resolve, 500));
 
                 // get clipboard text
                 const text = await vscode.env.clipboard.readText();
