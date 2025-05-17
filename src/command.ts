@@ -124,7 +124,6 @@ export default class Command {
 
                 await this.execute(command, options);
 
-                /* await vscode.commands.executeCommand('workbench.action.chat.open'); */
                await new Promise(resolve => setTimeout(resolve, 500));
 
                 // get clipboard text
@@ -136,10 +135,20 @@ export default class Command {
                     await vscode.env.clipboard.writeText(text);
                 }
 
-                // await vscode.commands.executeCommand('editor.action.clipboardPasteAction');
-                // await new Promise(resolve => setTimeout(resolve, 1000));
-
-                await this.execute("llm", options);
+                let llm = await vscode.window.showInputBox({ 
+                    placeHolder: "mpp",
+                    value: 'mpp',
+                    title: "Run with LLM",
+                }) ?? "llm";
+                if (llm === 'chat') {
+                    await vscode.commands.executeCommand('workbench.action.chat.open');
+                    await new Promise(resolve => setTimeout(resolve, 700));
+                    await vscode.commands.executeCommand('workbench.panel.chat.view.copilot.focus');
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                    await vscode.commands.executeCommand('editor.action.clipboardPasteAction');
+                } else {
+                    await this.execute(llm, options);
+                }
             }
 
 
