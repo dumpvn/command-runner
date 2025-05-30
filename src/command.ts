@@ -136,10 +136,11 @@ export default class Command {
                 }
 
                 let llm = await vscode.window.showInputBox({ 
-                    placeHolder: "mpp",
-                    value: 'mpp',
+                    placeHolder: "chat",
+                    value: 'chat',
                     title: "Run with LLM",
-                }) ?? "llm";
+                }) ?? "chat";
+
                 if (llm === 'chat') {
                     await vscode.commands.executeCommand('workbench.action.chat.open');
                     await new Promise(resolve => setTimeout(resolve, 700));
@@ -149,6 +150,7 @@ export default class Command {
                 } else {
                     await this.execute(llm, options);
                 }
+
             }
 
 
