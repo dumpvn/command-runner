@@ -135,16 +135,27 @@ export default class Command {
                     await vscode.env.clipboard.writeText(text);
                 }
 
-                let llm = await vscode.window.showInputBox({ 
-                    placeHolder: "chat",
-                    value: 'chat',
-                    title: "Run with LLM",
-                }) ?? "chat";
+
+                let defaultLlm : string | undefined = vscode.workspace.getConfiguration('command-runner.llm').get('default');
+                let llm = defaultLlm;
+                if (!llm) {
+                    llm = await vscode.window.showInputBox({ 
+                        placeHolder: "chat",
+                        value: 'chat',
+                        title: "Run with LLM",
+                    }) ?? "chat";
+                }
 
                 if (llm === 'chat') {
                     await vscode.commands.executeCommand('workbench.action.chat.open');
                     await new Promise(resolve => setTimeout(resolve, 700));
                     await vscode.commands.executeCommand('workbench.panel.chat.view.copilot.focus');
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                    await vscode.commands.executeCommand('editor.action.clipboardPasteAction');
+                } else if (llm === 'cursor') {
+                    await vscode.commands.executeCommand('composer.createNewWithPrevContext');
+                    await new Promise(resolve => setTimeout(resolve, 700));
+                    await vscode.commands.executeCommand('aichat.newfollowupaction');
                     await new Promise(resolve => setTimeout(resolve, 300));
                     await vscode.commands.executeCommand('editor.action.clipboardPasteAction');
                 } else {

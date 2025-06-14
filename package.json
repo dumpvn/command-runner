@@ -41,6 +41,12 @@
             "type": "object",
             "title": "Command Runner",
             "properties": {
+                "command-runner.llm.default": {
+                    "type": "string",
+                    "default": "",
+                    "description": "default LLM to be used for prompt",
+                    "scope": "resource"
+                },
                 "command-runner.terminal.name": {
                     "type": "string",
                     "default": "",
