@@ -124,16 +124,9 @@ export default class Command {
 
                 await this.execute(command, options);
 
-               await new Promise(resolve => setTimeout(resolve, 500));
+                // it was just a sendText action and there is no guarantee that the command execution is done
+                // so just leave it there and ask user to pick the llm first
 
-                // get clipboard text
-                const text = await vscode.env.clipboard.readText();
-                const resolvedText = await this.resolve(text);
-                if (resolvedText) {
-                    await vscode.env.clipboard.writeText(resolvedText);
-                } else {
-                    await vscode.env.clipboard.writeText(text);
-                }
 
 
                 let defaultLlm : string | undefined = vscode.workspace.getConfiguration('command-runner.llm').get('default');
@@ -144,6 +137,13 @@ export default class Command {
                         value: 'chat',
                         title: "Run with LLM",
                     }) ?? "chat";
+                }
+
+                // get clipboard text
+                const text = await vscode.env.clipboard.readText();
+                const resolvedText = await this.resolve(text);
+                if (resolvedText) {
+                    await vscode.env.clipboard.writeText(resolvedText);
                 }
 
                 if (llm === 'chat') {
@@ -234,7 +234,7 @@ export default class Command {
         if (autoScrollToBottom) {
             await vscode.commands.executeCommand('workbench.action.terminal.scrollToBottom');
         }
-        
+
         console.log('--> Run Command:', command);
     }
 
