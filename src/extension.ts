@@ -108,7 +108,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
                 // Handle insert command
                 // If the text starts with 'ins ' or 'explain', we will look for the code block above it
-                if (text.startsWith('ins ') || text.trim() === 'explain') {
+                if (text.startsWith('ins ') || text.trim() === 'explain' || text.startsWith('explain ')) {
                     const document = activeEditor.document;
                     let currentLine = activeEditor.selection.active.line - 1;
                     while (currentLine > 0 && document.lineAt(currentLine).text.trim() !== '```') {
