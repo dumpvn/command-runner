@@ -4,6 +4,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import * as path from 'path';
 import Command, { TerminalOptions } from './command';
 
 
@@ -146,9 +147,33 @@ export function activate(context: vscode.ExtensionContext): void {
                 }
 
 
-                /* search references
-                if text match '- [[something-here]]' then replace text with "sf something-here"
-                */
+
+               // Handle PowerShell file sourcing pattern: "- some file here"
+                if (text.startsWith('- ') && !text.startsWith('- [[')) {
+                    const match = text.match(/- (.+)/);
+                    if (match) {
+                        let fileName = match[1].toLowerCase().replace(/ /g, '-');
+                        // Add .ps1 extension if no extension exists
+                        if (!path.extname(fileName)) {
+                            fileName += '.ps1';
+                        }
+                        
+                        // Create the absolute path
+                        const currentDir = path.dirname(vscode.window.activeTextEditor?.document?.uri.fsPath || '');
+                        const absolutePath = path.join(currentDir, fileName);
+                        
+                        // Create the PowerShell dot-sourcing command
+                        const psCommand = `. ivk "${absolutePath}"`;
+                        
+                        const command = new Command(context);
+                        if (typeof terminal === 'string') {
+                            terminal = { name: terminal };
+                        }
+                        command.execute(psCommand, terminal);
+                        return;
+                    }
+                }
+                
                 if (text.startsWith('- [[')) {
                     const match = text.match(/- \[\[(.+)\]\]/);
                     if (match) {
