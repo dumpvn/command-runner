@@ -86,7 +86,7 @@ export function activate(context: vscode.ExtensionContext): void {
                 //     return;
                 // }
 
-                if (text.startsWith('open')) {
+                if (text.startsWith('open ')) {
                     const textNoQuotes = text.replace(/['"\(\)]/g, '');
                     const match = textNoQuotes.match(/open\s*(.+)/);
                     if (match) {
