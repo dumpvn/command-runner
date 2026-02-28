@@ -99,6 +99,25 @@ export function activate(context: vscode.ExtensionContext): void {
                     return;
                 }
 
+                /* 
+                if text.trim() === "work"
+                    - get current active file without extension (e.g. if current file is command-runner.md => command-runner)
+                    - text = text + file without extension + " -coder" (e.g. work command-runner -coder)
+                */
+
+
+                // Handle special 'work' command
+                if (text.trim() === "work") {
+                    const activeFile = activeEditor.document.fileName;
+                    const fileBase = path.basename(activeFile, path.extname(activeFile));
+
+                    const command = new Command(context);
+                    if (typeof terminal === 'string') {
+                        terminal = { name: terminal };
+                    }
+                    command.execute(`work ${fileBase} -coder`, terminal);
+                    return;
+                }
 
                 if (text.startsWith('term ')) {
                     const terminalName = text.split(' ')[1];
