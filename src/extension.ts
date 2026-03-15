@@ -15,6 +15,40 @@ export interface CommandOptions {
     terminal?: string | TerminalOptions;
 }
 
+/**
+ * Finds the fenced code block (```...```) that ends on the line above the given line index.
+ * @param document - The text document to search in.
+ * @param lineIndex - 0-based line number of the line immediately below the desired code block (e.g. the "ins" line).
+ * @returns The full code block text including fences, or `undefined` if no valid block is found.
+ */
+function getCodeBlockAboveLine(document: vscode.TextDocument, lineIndex: number): string | undefined {
+    let currentLine = lineIndex - 1;
+    while (currentLine > 0 && document.lineAt(currentLine).text.trim() !== '```') {
+        currentLine--;
+    }
+
+    if (currentLine <= 0 || document.lineAt(currentLine).text.trim() !== '```') {
+        return undefined;
+    }
+
+    const codeBlock: string[] = [];
+    codeBlock.unshift(document.lineAt(currentLine).text);
+    currentLine--;
+
+    let foundOpeningBackticks = false;
+    while (currentLine >= 0) {
+        const lineText = document.lineAt(currentLine).text;
+        if (lineText.trim().startsWith('```')) {
+            foundOpeningBackticks = true;
+        }
+        codeBlock.unshift(lineText);
+        if (foundOpeningBackticks) break;
+        currentLine--;
+    }
+
+    return foundOpeningBackticks ? codeBlock.join('\n') : undefined;
+}
+
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -129,43 +163,19 @@ export function activate(context: vscode.ExtensionContext): void {
                 // Handle insert command
                 // If the text starts with 'ins ' or 'explain', we will look for the code block above it
                 if (text.startsWith('ins ') || text.trim() === 'explain' || text.startsWith('explain ') || text.trim() === 'exp' || text.trim() === 'exp llm') {
-                    const document = activeEditor.document;
-                    let currentLine = activeEditor.selection.active.line - 1;
-                    while (currentLine > 0 && document.lineAt(currentLine).text.trim() !== '```') {
-                        currentLine--;
-                    }
-                
-                    // Step 1: Check if the line above "ins" is ```
-                    if (currentLine > 0 && document.lineAt(currentLine).text.trim() === '```') {
-                        let codeBlock = [];
-                        let foundOpeningBackticks = false;
-                        
-                        codeBlock.unshift(document.lineAt(currentLine).text); // Add to the block
-                        currentLine--;
-                    
-                        // Step 2: Traverse upwards to find the start of the code block
-                        while (currentLine >= 0) {
-                            const lineText = document.lineAt(currentLine).text;
-                    
-                            // If we find the opening backticks, stop
-                            if (lineText.trim().startsWith('```')) {
-                                foundOpeningBackticks = true;
-                            }
-                    
-                            codeBlock.unshift(lineText); // Add to the block
-                            if (foundOpeningBackticks) break;
-
-                            currentLine--;
-                        }
-                    
-                        // Step 3: Copy to clipboard if a block was found
-                        if (foundOpeningBackticks) {
-                            vscode.env.clipboard.writeText(codeBlock.join('\n'));
-                        }
+                    const codeBlock = getCodeBlockAboveLine(activeEditor.document, activeEditor.selection.active.line);
+                    if (codeBlock) {
+                        vscode.env.clipboard.writeText(codeBlock);
                     }
                 }
 
-
+                // /clip <description>: copy code block above to clipboard, then run this command in terminal
+                if (text.startsWith('/clip')) {
+                    const codeBlock = getCodeBlockAboveLine(activeEditor.document, activeEditor.selection.active.line);
+                    if (codeBlock) {
+                        vscode.env.clipboard.writeText(codeBlock);
+                    }
+                }
 
                // Handle PowerShell file sourcing pattern: "- some file here"
                 if (text.startsWith('- ') && !text.startsWith('- [[')) {
