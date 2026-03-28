@@ -105,8 +105,18 @@ export function activate(context: vscode.ExtensionContext): void {
                 if (!text) {
                     text = activeEditor.document.lineAt(activeEditor.selection.active.line).text;
                 }
-
                 text = text.trim();
+
+                if (text.startsWith('#')) {
+                    vscode.env.clipboard.writeText(text);
+                    const command = new Command(context);
+
+                    if (typeof terminal === 'string') {
+                        terminal = { name: terminal };
+                    }
+                    command.execute('q', terminal);
+                    return;
+                }
 
                 // if (text.startsWith('open ')) {
                 //     const match = text.match(/open\s+(.+)/);
