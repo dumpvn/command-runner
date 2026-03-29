@@ -187,7 +187,7 @@ export function activate(context: vscode.ExtensionContext): void {
                     }
                 }
 
-               // Handle PowerShell file sourcing pattern: "- some file here"
+                // Handle PowerShell file sourcing pattern: "- some file here"
                 if (text.startsWith('- ') && !text.startsWith('- [[')) {
                     const match = text.match(/- (.+)/);
                     if (match) {
@@ -215,6 +215,18 @@ export function activate(context: vscode.ExtensionContext): void {
                 
                 if (text.startsWith('- [[')) {
                     const match = text.match(/- \[\[(.+)\]\]/);
+                    if (match) {
+                        const command = new Command(context);
+                        if (typeof terminal === 'string') {
+                            terminal = { name: terminal };
+                        }
+                        command.execute(`sf ${match[1]}`, terminal);
+                        return;
+                    }
+                }
+
+                if (text.startsWith('* ')) {
+                    const match = text.match(/\*\s+(.+)/);
                     if (match) {
                         const command = new Command(context);
                         if (typeof terminal === 'string') {
