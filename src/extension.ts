@@ -236,6 +236,18 @@ export function activate(context: vscode.ExtensionContext): void {
                         return;
                     }
                 }
+
+                if (text.startsWith('> ')) {
+                    const match = text.match(/>\s+(.+)/);
+                    if (match) {
+                        const command = new Command(context);
+                        if (typeof terminal === 'string') {
+                            terminal = { name: terminal };
+                        }
+                        command.execute(`cf ${match[1]}`, terminal);
+                        return;
+                    }
+                }
             }
 
             const command = new Command(context);
