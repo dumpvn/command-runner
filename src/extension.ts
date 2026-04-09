@@ -97,7 +97,7 @@ export function activate(context: vscode.ExtensionContext): void {
     );
 
 	context.subscriptions.push(
-        vscode.commands.registerCommand('command-runner.runInTerminal', ({ terminal }: CommandOptions = {}) => {
+        vscode.commands.registerCommand('command-runner.runInTerminal', async ({ terminal }: CommandOptions = {}) => {
 
             const activeEditor = vscode.window.activeTextEditor;
             if (activeEditor) {
@@ -196,7 +196,18 @@ export function activate(context: vscode.ExtensionContext): void {
                         if (!path.extname(fileName)) {
                             fileName += '.ps1';
                         }
-                        
+
+                        if (path.isAbsolute(fileName)) {
+                            try {
+                                await vscode.workspace.fs.stat(vscode.Uri.file(fileName));
+                                const doc = await vscode.workspace.openTextDocument(vscode.Uri.file(fileName));
+                                await vscode.window.showTextDocument(doc);
+                                return;
+                            } catch {
+                                // File doesn't exist, fall through to normal handling
+                            }
+                        }
+
                         // Create the absolute path
                         const currentDir = path.dirname(vscode.window.activeTextEditor?.document?.uri.fsPath || '');
                         const absolutePath = path.join(currentDir, fileName);
