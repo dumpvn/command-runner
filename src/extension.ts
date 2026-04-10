@@ -55,15 +55,15 @@ function getCodeBlockAboveLine(document: vscode.TextDocument, lineIndex: number)
 // https://code.visualstudio.com/api/references/vscode-api 
 //		Extension writers can provide APIs to other extensions by returning their API public surface from the activate-call.
 export function activate(context: vscode.ExtensionContext): void {
-	
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "command-runner" is now active!');
+
+    // Use the console to output diagnostic information (console.log) and errors (console.error)
+    // This line of code will only be executed once when your extension is activated
+    console.log('Congratulations, your extension "command-runner" is now active!');
 
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
+    // The command has been defined in the package.json file
+    // Now provide the implementation of the command with registerCommand
+    // The commandId parameter must match the command field in package.json
     context.subscriptions.push(
         vscode.commands.registerCommand('command-runner.runChatCopilot', async () => {
             const command = new Command(context);
@@ -82,21 +82,21 @@ export function activate(context: vscode.ExtensionContext): void {
 
                     await vscode.env.clipboard.writeText(text);
                     await vscode.commands.executeCommand('workbench.action.chat.open');
-                    await new Promise(resolve => setTimeout(resolve, 1000)); 
+                    await new Promise(resolve => setTimeout(resolve, 1000));
                     await vscode.commands.executeCommand('editor.action.clipboardPasteAction');
                     await new Promise(resolve => setTimeout(resolve, 1000));
-                } 
+                }
                 // else {
                 //     vscode.window.showInformationMessage('No text selected to run in Chat Copilot.');
                 // }
-            } 
+            }
             // else {
             //     vscode.window.showInformationMessage('No active editor found.');
             // }
         })
     );
 
-	context.subscriptions.push(
+    context.subscriptions.push(
         vscode.commands.registerCommand('command-runner.runInTerminal', async ({ terminal }: CommandOptions = {}) => {
 
             const activeEditor = vscode.window.activeTextEditor;
@@ -211,10 +211,10 @@ export function activate(context: vscode.ExtensionContext): void {
                         // Create the absolute path
                         const currentDir = path.dirname(vscode.window.activeTextEditor?.document?.uri.fsPath || '');
                         const absolutePath = path.join(currentDir, fileName);
-                        
+
                         // Create the PowerShell dot-sourcing command
                         const psCommand = `. ivk "${absolutePath}"`;
-                        
+
                         const command = new Command(context);
                         if (typeof terminal === 'string') {
                             terminal = { name: terminal };
@@ -223,7 +223,7 @@ export function activate(context: vscode.ExtensionContext): void {
                         return;
                     }
                 }
-                
+
                 if (text.startsWith('- [[')) {
                     const match = text.match(/- \[\[(.+)\]\]/);
                     if (match) {
@@ -238,6 +238,30 @@ export function activate(context: vscode.ExtensionContext): void {
 
                 if (text.startsWith('* ')) {
                     const match = text.match(/\*\s+(.+)/);
+                    if (match) {
+                        const command = new Command(context);
+                        if (typeof terminal === 'string') {
+                            terminal = { name: terminal };
+                        }
+                        command.execute(`sf ${match[1]}`, terminal);
+                        return;
+                    }
+                }
+
+                if (text.startsWith('**')) {
+                    const match = text.match(/\*\*(.+)\*\*/);
+                    if (match) {
+                        const command = new Command(context);
+                        if (typeof terminal === 'string') {
+                            terminal = { name: terminal };
+                        }
+                        command.execute(`sf ${match[1]}`, terminal);
+                        return;
+                    }
+                }
+
+                if (text.startsWith('`')) {
+                    const match = text.match(/`(.+)`/);
                     if (match) {
                         const command = new Command(context);
                         if (typeof terminal === 'string') {
@@ -270,7 +294,7 @@ export function activate(context: vscode.ExtensionContext): void {
         })
     );
 
-	context.subscriptions.push(
+    context.subscriptions.push(
         vscode.commands.registerCommand('command-runner.run', async (opts: CommandOptions = {}, files?: vscode.Uri[]) => {
             const command = new Command(context);
             const cmd = opts.command || opts.cmd || '';
@@ -320,4 +344,4 @@ export function activate(context: vscode.ExtensionContext): void {
 }
 
 // this method is called when your extension is deactivated
-export function deactivate() {}
+export function deactivate() { }
