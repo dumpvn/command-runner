@@ -189,6 +189,24 @@ export function activate(context: vscode.ExtensionContext): void {
 
                 // Handle PowerShell file sourcing pattern: "- some file here"
                 if (text.startsWith('- ') && !text.startsWith('- [[')) {
+
+                    // Support backtick-wrapped absolute path format:
+                    // - `C:\path\to\file.c` — some description
+                    const backtickMatch = text.match(/^- `([^`]+)`/);
+                    if (backtickMatch) {
+                        const filePath = backtickMatch[1];
+                        if (path.isAbsolute(filePath)) {
+                            try {
+                                await vscode.workspace.fs.stat(vscode.Uri.file(filePath));
+                                const doc = await vscode.workspace.openTextDocument(vscode.Uri.file(filePath));
+                                await vscode.window.showTextDocument(doc);
+                                return;
+                            } catch {
+                                // File doesn't exist, fall through to normal handling
+                            }
+                        }
+                    }
+
                     const match = text.match(/- (.+)/);
                     if (match) {
                         let fileName = match[1].toLowerCase().replace(/ /g, '-');
