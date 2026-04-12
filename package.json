@@ -2,7 +2,7 @@
     "name": "command-runner",
     "displayName": "command runner",
     "description": "command runner",
-    "version": "0.0.88",
+    "version": "0.0.89",
     "icon": "resource/powershell_128px.png",
     "repository": {
         "type": "git",
