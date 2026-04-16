@@ -49,6 +49,24 @@ function getCodeBlockAboveLine(document: vscode.TextDocument, lineIndex: number)
     return foundOpeningBackticks ? codeBlock.join('\n') : undefined;
 }
 
+/**
+ * Scans backward from the given line to find the nearest "term <name>" directive.
+ * @param document - The text document to search in.
+ * @param lineIndex - 0-based line number to start searching from (inclusive).
+ * @returns The terminal name if found, or undefined.
+ */
+function findTerminalFromContext(document: vscode.TextDocument, lineIndex: number): string | undefined {
+    for (let i = lineIndex; i >= 0; i--) {
+        const lineText = document.lineAt(i).text.trim();
+        if (lineText.startsWith('term ')) {
+            const parts = lineText.split(/\s+/);
+            if (parts.length >= 2) {
+                return parts[1];
+            }
+        }
+    }
+    return undefined;
+}
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -106,6 +124,18 @@ export function activate(context: vscode.ExtensionContext): void {
                     text = activeEditor.document.lineAt(activeEditor.selection.active.line).text;
                 }
                 text = text.trim();
+
+
+
+
+                // Scan backward from the active line to find the nearest "term <name>" directive
+                const detectedTerminal = findTerminalFromContext(activeEditor.document, activeEditor.selection.active.line);
+                if (detectedTerminal) {
+                    terminal = { name: detectedTerminal };
+                    new Command(context).switchTerminal(detectedTerminal);
+                }
+
+
 
                 if (text.startsWith('#')) {
                     vscode.env.clipboard.writeText(text);
