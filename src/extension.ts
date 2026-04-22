@@ -56,12 +56,31 @@ function getCodeBlockAboveLine(document: vscode.TextDocument, lineIndex: number)
  * @returns The terminal name if found, or undefined.
  */
 function findTerminalFromContext(document: vscode.TextDocument, lineIndex: number): string | undefined {
+    // Once we pass a plain closing fence (```), any opening fences above it belong to
+    // a different code block — don't use their language for terminal detection.
+    let passedClosingFence = false;
+
     for (let i = lineIndex; i >= 0; i--) {
         const lineText = document.lineAt(i).text.trim();
+
         if (lineText.startsWith('term ')) {
             const parts = lineText.split(/\s+/);
             if (parts.length >= 2) {
                 return parts[1];
+            }
+        }
+
+        // Support codeblock header as terminal specifier:
+        //   ```pwsh   → run in "pwsh" terminal
+        //   ```claude → run in "claude" terminal
+        if (lineText.startsWith('```')) {
+            const lang = lineText.slice(3).trim();
+            if (lang && !passedClosingFence) {
+                // Opening fence and cursor is inside this block
+                return lang;
+            } else if (!lang) {
+                // Plain closing fence — cursor is outside this block
+                passedClosingFence = true;
             }
         }
     }
@@ -199,6 +218,8 @@ export function activate(context: vscode.ExtensionContext): void {
                     command.switchTerminal(terminalName);
                     return;
                 }
+
+                
 
                 // Handle insert command
                 // If the text starts with 'ins ' or 'explain', we will look for the code block above it
