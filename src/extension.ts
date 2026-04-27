@@ -92,7 +92,7 @@ function findTerminalFromContext(document: vscode.TextDocument, lineIndex: numbe
             }
         }
     }
-    return undefined;
+    return 'pwsh';
 }
 
 // this method is called when your extension is activated
