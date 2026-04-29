@@ -202,6 +202,8 @@ export default class Command {
         }
 
         const terminal = createTerminal(terminalOptions);
+        const originalName = terminal.name;
+
         if (autoFocus && terminal !== vscode.window.activeTerminal) {
             terminal.show();
         }
@@ -229,12 +231,34 @@ export default class Command {
             terminal.sendText("", true); // final enter
         } else {
             terminal.sendText(text, true);
+            // bracket paste mode (enabled by CLIs like Claude) buffers the entire paste — including
+            // the newline from addNewLine:true — so nothing submits. A second Enter after the paste
+            // bracket closes triggers submission.
+            if (text.includes('\n')) {
+                await delay(50);
+                terminal.sendText('', true);
+            }
         }
+
+        // VS Code auto-renames the terminal when it detects a new foreground process;
+        // restore via renameWithArg (sticky custom label) after the process has started
+        void delay(1500).then(async () => {
+            const previouslyActive = vscode.window.activeTerminal;
+            terminal.show(true); // make active without stealing editor focus
+            await vscode.commands.executeCommand('workbench.action.terminal.renameWithArg', { name: originalName });
+
+            // i don't want to switch to old terminal so comment this out.
+            // if (previouslyActive && previouslyActive !== terminal) {
+            //     previouslyActive.show(true); // restore previously active terminal
+            // }
+            await vscode.commands.executeCommand('workbench.action.focusActiveEditorGroup');
+        });
 
         if (autoScrollToBottom) {
             await vscode.commands.executeCommand('workbench.action.terminal.scrollToBottom');
         }
 
+        await vscode.commands.executeCommand('workbench.action.focusActiveEditorGroup');
         console.log('--> Run Command:', command);
     }
 
