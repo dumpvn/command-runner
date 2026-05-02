@@ -202,16 +202,15 @@ export default class Command {
         }
 
         const terminal = createTerminal(terminalOptions);
-        const originalName = terminal.name;
+        terminal.show(true);
 
-        if (autoFocus && terminal !== vscode.window.activeTerminal) {
-            terminal.show();
-        }
+        // if (autoFocus && terminal !== vscode.window.activeTerminal) {
+        //     terminal.show(true);
+        // }
 
-        if (autoClear) {
-            await vscode.commands.executeCommand('workbench.action.terminal.clear');
-        }
-
+        // if (autoClear) {
+        //     await vscode.commands.executeCommand('workbench.action.terminal.clear');
+        // }
 
         // vscode user option to enable or disable 
         // the selected block will be executed line by line
@@ -240,28 +239,16 @@ export default class Command {
             }
         }
 
+        await vscode.commands.executeCommand('workbench.action.terminal.scrollToBottom');
+        // if (autoScrollToBottom) {
+        //     await vscode.commands.executeCommand('workbench.action.terminal.scrollToBottom');
+        // }
+
         // VS Code auto-renames the terminal when it detects a new foreground process;
         // restore via renameWithArg (sticky custom label) after the process has started
         void delay(1500).then(async () => {
-            // const previouslyActive = vscode.window.activeTerminal;
-            terminal.show(true); // make active without stealing editor focus
-            terminal.show(true); // make active without stealing editor focus
-            terminal.show(true); // make active without stealing editor focus
-            // workbench.action.terminal.rename
-            await vscode.commands.executeCommand('workbench.action.terminal.renameWithArg', { name: originalName });
-
-            // i don't want to switch to old terminal so comment this out.
-            // if (previouslyActive && previouslyActive !== terminal) {
-            //     previouslyActive.show(true); // restore previously active terminal
-            // }
-            await vscode.commands.executeCommand('workbench.action.focusActiveEditorGroup');
-            await vscode.commands.executeCommand('workbench.action.focusActiveEditorGroup');
-            await vscode.commands.executeCommand('workbench.action.focusActiveEditorGroup');
+            terminal.show(true);
         });
-
-        if (autoScrollToBottom) {
-            await vscode.commands.executeCommand('workbench.action.terminal.scrollToBottom');
-        }
 
         await vscode.commands.executeCommand('workbench.action.focusActiveEditorGroup');
         console.log('--> Run Command:', command);
@@ -279,8 +266,9 @@ export default class Command {
         terminalOptions.name = terminalName;
        
         const terminal = createTerminal(terminalOptions);
-        if (terminal !== vscode.window.activeTerminal) {
-            terminal.show(true);
-        }
+        terminal.show(true);
+        // if (terminal !== vscode.window.activeTerminal) {
+        //     terminal.show(true);
+        // }
     }
 }
