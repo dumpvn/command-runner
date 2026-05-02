@@ -243,14 +243,19 @@ export default class Command {
         // VS Code auto-renames the terminal when it detects a new foreground process;
         // restore via renameWithArg (sticky custom label) after the process has started
         void delay(1500).then(async () => {
-            const previouslyActive = vscode.window.activeTerminal;
+            // const previouslyActive = vscode.window.activeTerminal;
             terminal.show(true); // make active without stealing editor focus
+            terminal.show(true); // make active without stealing editor focus
+            terminal.show(true); // make active without stealing editor focus
+            // workbench.action.terminal.rename
             await vscode.commands.executeCommand('workbench.action.terminal.renameWithArg', { name: originalName });
 
             // i don't want to switch to old terminal so comment this out.
             // if (previouslyActive && previouslyActive !== terminal) {
             //     previouslyActive.show(true); // restore previously active terminal
             // }
+            await vscode.commands.executeCommand('workbench.action.focusActiveEditorGroup');
+            await vscode.commands.executeCommand('workbench.action.focusActiveEditorGroup');
             await vscode.commands.executeCommand('workbench.action.focusActiveEditorGroup');
         });
 
