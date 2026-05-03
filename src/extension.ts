@@ -63,12 +63,12 @@ function findTerminalFromContext(document: vscode.TextDocument, lineIndex: numbe
     for (let i = lineIndex; i >= 0; i--) {
         const lineText = document.lineAt(i).text.trim();
 
-        if (lineText === 'claude' || lineText === '# Claude Session Transcript') {
+        if (lineText === 'claude' || lineText === '# claude') {
             return 'claude';
         }
 
-        if (lineText === 'pwsh') {
-            return lineText;
+        if (lineText === 'pwsh' || lineText === '# pwsh') {
+            return 'pwsh';
         }
 
         if (lineText.startsWith('term ')) {
