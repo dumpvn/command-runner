@@ -85,6 +85,9 @@ function findTerminalFromContext(document: vscode.TextDocument, lineIndex: numbe
             const lang = lineText.slice(3).trim();
             if (lang && !passedClosingFence) {
                 // Opening fence and cursor is inside this block
+                if (lang === 'powershell') {
+                    return 'pwsh'
+                }
                 return lang;
             } else if (!lang) {
                 // Plain closing fence — cursor is outside this block
@@ -226,8 +229,6 @@ export function activate(context: vscode.ExtensionContext): void {
                     command.switchTerminal(terminalName);
                     return;
                 }
-
-                
 
                 // Handle insert command
                 // If the text starts with 'ins ' or 'explain', we will look for the code block above it
