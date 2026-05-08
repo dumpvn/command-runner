@@ -173,17 +173,54 @@ export function activate(context: vscode.ExtensionContext): void {
                 //     return;
                 // }
 
-                // if (text.startsWith('open ')) {
-                //     const match = text.match(/open\s+(.+)/);
-                //     if (match) {
-                //         const filePath = match[1];
-                //         const openPath = vscode.Uri.file(filePath);
-                //         vscode.workspace.openTextDocument(openPath).then(doc => {
-                //             vscode.window.showTextDocument(doc);
-                //         });
-                //     }
-                //     return;
-                // }
+                if (text.startsWith('read ') || text.startsWith('open ')) {
+                    const match = text.match(/read\s+(.+)/);
+                    if (match) {
+                        const payload = match[1];
+                        if (payload) {
+                            const tokens = payload.split(/\s+/);
+                            const workspaceFolders = vscode.workspace.workspaceFolders;
+                            const workspaceUri = workspaceFolders && workspaceFolders.length > 0 
+                                ? workspaceFolders[0].uri
+                                : undefined;
+                            let foundValidFile = false;
+                            for (const token of tokens) {
+                                const cleanToken = token.replace(/^["']|["']$/g, '');
+                                let fileUri;
+                                if (cleanToken.startsWith('/') || /^[a-zA-Z]:[\\/]/.test(cleanToken)) {
+                                    fileUri = vscode.Uri.file(cleanToken);
+                                } else if (workspaceUri) {
+                                    // 2. Use VS Code's native joinPath instead of the Node 'path' module
+                                    fileUri = vscode.Uri.joinPath(workspaceUri, cleanToken);
+                                } else {
+                                    // Relative path, but no workspace is open
+                                    continue; 
+                                }
+                                try {
+                                    // 3. Check if the file exists using the VS Code API
+                                    // .stat() throws an error if the file doesn't exist
+                                    await vscode.workspace.fs.stat(fileUri);
+                                    // If we get here, the file exists!
+                                    foundValidFile = true;
+                                    // 4. Open the file
+                                    const doc = await vscode.workspace.openTextDocument(fileUri);
+                                    vscode.window.showTextDocument(doc, { preview: false });
+                                    // break; // Uncomment this if you only want to open the FIRST valid file
+                                } catch (error) {
+                                    // File doesn't exist, just silently fail and let the loop check the next token
+                                }
+                            }
+                            if (foundValidFile) {
+                                return;
+                            }
+                        }
+                        // const filePath = match[1];
+                        // const openPath = vscode.Uri.file(filePath);
+                        // vscode.workspace.openTextDocument(openPath).then(doc => {
+                        //     vscode.window.showTextDocument(doc);
+                        // });
+                    }
+                }
 
                 // if (text.startsWith('open ')) {
                 //     const textNoQuotes = text.replace(/['"\(\)]/g, '');
