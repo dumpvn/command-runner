@@ -155,9 +155,6 @@ export function activate(context: vscode.ExtensionContext): void {
                 }
                 text = text.trim();
 
-
-
-
                 // Scan backward from the active line to find the nearest "term <name>" directive
                 const detectedTerminal = findTerminalFromContext(activeEditor.document, activeEditor.selection.active.line);
                 if (detectedTerminal) {
@@ -165,18 +162,16 @@ export function activate(context: vscode.ExtensionContext): void {
                     new Command(context).switchTerminal(detectedTerminal);
                 }
 
+                // if (text.startsWith('#')) {
+                //     vscode.env.clipboard.writeText(text);
+                //     const command = new Command(context);
 
-
-                if (text.startsWith('#')) {
-                    vscode.env.clipboard.writeText(text);
-                    const command = new Command(context);
-
-                    if (typeof terminal === 'string') {
-                        terminal = { name: terminal };
-                    }
-                    command.execute('q', terminal);
-                    return;
-                }
+                //     if (typeof terminal === 'string') {
+                //         terminal = { name: terminal };
+                //     }
+                //     command.execute('q', terminal);
+                //     return;
+                // }
 
                 // if (text.startsWith('open ')) {
                 //     const match = text.match(/open\s+(.+)/);
@@ -190,18 +185,18 @@ export function activate(context: vscode.ExtensionContext): void {
                 //     return;
                 // }
 
-                if (text.startsWith('open ')) {
-                    const textNoQuotes = text.replace(/['"\(\)]/g, '');
-                    const match = textNoQuotes.match(/open\s*(.+)/);
-                    if (match) {
-                        const filePath = match[1];
-                        const openPath = vscode.Uri.file(filePath);
-                        vscode.workspace.openTextDocument(openPath).then(doc => {
-                            vscode.window.showTextDocument(doc);
-                        });
-                    }
-                    return;
-                }
+                // if (text.startsWith('open ')) {
+                //     const textNoQuotes = text.replace(/['"\(\)]/g, '');
+                //     const match = textNoQuotes.match(/open\s*(.+)/);
+                //     if (match) {
+                //         const filePath = match[1];
+                //         const openPath = vscode.Uri.file(filePath);
+                //         vscode.workspace.openTextDocument(openPath).then(doc => {
+                //             vscode.window.showTextDocument(doc);
+                //         });
+                //     }
+                //     return;
+                // }
 
                 /* 
                 if text.trim() === "work"
@@ -211,28 +206,29 @@ export function activate(context: vscode.ExtensionContext): void {
 
 
                 // Handle special 'work' command
-                if (text.trim() === "work") {
-                    const activeFile = activeEditor.document.fileName;
-                    const fileBase = path.basename(activeFile, path.extname(activeFile));
+                // if (text.trim() === "work") {
+                //     const activeFile = activeEditor.document.fileName;
+                //     const fileBase = path.basename(activeFile, path.extname(activeFile));
 
-                    const command = new Command(context);
-                    if (typeof terminal === 'string') {
-                        terminal = { name: terminal };
-                    }
-                    command.execute(`work ${fileBase} -coder`, terminal);
-                    return;
-                }
+                //     const command = new Command(context);
+                //     if (typeof terminal === 'string') {
+                //         terminal = { name: terminal };
+                //     }
+                //     command.execute(`work ${fileBase} -coder`, terminal);
+                //     return;
+                // }
 
-                if (text.startsWith('term ')) {
-                    const terminalName = text.split(' ')[1];
-                    const command = new Command(context);
-                    command.switchTerminal(terminalName);
-                    return;
-                }
+                // if (text.startsWith('term ')) {
+                //     const terminalName = text.split(' ')[1];
+                //     const command = new Command(context);
+                //     command.switchTerminal(terminalName);
+                //     return;
+                // }
 
                 // Handle insert command
                 // If the text starts with 'ins ' or 'explain', we will look for the code block above it
-                if (text.startsWith('ins ') || text.trim() === 'explain' || text.startsWith('explain ') || text.trim() === 'exp' || text.trim() === 'exp llm') {
+                // || text.trim() === 'explain' || text.startsWith('explain ') || text.trim() === 'exp' || text.trim() === 'exp llm'
+                if (text.startsWith('ins ')) {
                     const codeBlock = getCodeBlockAboveLine(activeEditor.document, activeEditor.selection.active.line);
                     if (codeBlock) {
                         vscode.env.clipboard.writeText(codeBlock);
@@ -240,12 +236,12 @@ export function activate(context: vscode.ExtensionContext): void {
                 }
 
                 // /clip <description>: copy code block above to clipboard, then run this command in terminal
-                if (text.startsWith('/clip')) {
-                    const codeBlock = getCodeBlockAboveLine(activeEditor.document, activeEditor.selection.active.line);
-                    if (codeBlock) {
-                        vscode.env.clipboard.writeText(codeBlock);
-                    }
-                }
+                // if (text.startsWith('/clip')) {
+                //     const codeBlock = getCodeBlockAboveLine(activeEditor.document, activeEditor.selection.active.line);
+                //     if (codeBlock) {
+                //         vscode.env.clipboard.writeText(codeBlock);
+                //     }
+                // }
 
                 // Handle PowerShell file sourcing pattern: "- some file here"
                 if (text.startsWith('- ') && !text.startsWith('- [[')) {
@@ -302,65 +298,64 @@ export function activate(context: vscode.ExtensionContext): void {
                     }
                 }
 
-                if (text.startsWith('- [[')) {
-                    const match = text.match(/- \[\[(.+)\]\]/);
-                    if (match) {
-                        const command = new Command(context);
-                        if (typeof terminal === 'string') {
-                            terminal = { name: terminal };
-                        }
-                        command.execute(`sf ${match[1]}`, terminal);
-                        return;
-                    }
-                }
+                // if (text.startsWith('- [[')) {
+                //     const match = text.match(/- \[\[(.+)\]\]/);
+                //     if (match) {
+                //         const command = new Command(context);
+                //         if (typeof terminal === 'string') {
+                //             terminal = { name: terminal };
+                //         }
+                //         command.execute(`sf ${match[1]}`, terminal);
+                //         return;
+                //     }
+                // }
 
-                if (text.startsWith('* ')) {
-                    const match = text.match(/\*\s+(.+)/);
-                    if (match) {
-                        const command = new Command(context);
-                        if (typeof terminal === 'string') {
-                            terminal = { name: terminal };
-                        }
-                        command.execute(`sf ${match[1]}`, terminal);
-                        return;
-                    }
-                }
+                // if (text.startsWith('* ')) {
+                //     const match = text.match(/\*\s+(.+)/);
+                //     if (match) {
+                //         const command = new Command(context);
+                //         if (typeof terminal === 'string') {
+                //             terminal = { name: terminal };
+                //         }
+                //         command.execute(`sf ${match[1]}`, terminal);
+                //         return;
+                //     }
+                // }
 
-                if (text.startsWith('**')) {
-                    const match = text.match(/\*\*(.+)\*\*/);
-                    if (match) {
-                        const command = new Command(context);
-                        if (typeof terminal === 'string') {
-                            terminal = { name: terminal };
-                        }
-                        command.execute(`sf ${match[1]}`, terminal);
-                        return;
-                    }
-                }
+                // if (text.startsWith('**')) {
+                //     const match = text.match(/\*\*(.+)\*\*/);
+                //     if (match) {
+                //         const command = new Command(context);
+                //         if (typeof terminal === 'string') {
+                //             terminal = { name: terminal };
+                //         }
+                //         command.execute(`sf ${match[1]}`, terminal);
+                //         return;
+                //     }
+                // }
 
-                if (text.startsWith('`')) {
-                    const match = text.match(/`(.+)`/);
-                    if (match) {
-                        const command = new Command(context);
-                        if (typeof terminal === 'string') {
-                            terminal = { name: terminal };
-                        }
-                        command.execute(`sf ${match[1]}`, terminal);
-                        return;
-                    }
-                }
-
-                if (text.startsWith('> ')) {
-                    const match = text.match(/>\s+(.+)/);
-                    if (match) {
-                        const command = new Command(context);
-                        if (typeof terminal === 'string') {
-                            terminal = { name: terminal };
-                        }
-                        command.execute(`cf ${match[1]}`, terminal);
-                        return;
-                    }
-                }
+                // if (text.startsWith('`')) {
+                //     const match = text.match(/`(.+)`/);
+                //     if (match) {
+                //         const command = new Command(context);
+                //         if (typeof terminal === 'string') {
+                //             terminal = { name: terminal };
+                //         }
+                //         command.execute(`sf ${match[1]}`, terminal);
+                //         return;
+                //     }
+                // }
+                // if (text.startsWith('> ')) {
+                //     const match = text.match(/>\s+(.+)/);
+                //     if (match) {
+                //         const command = new Command(context);
+                //         if (typeof terminal === 'string') {
+                //             terminal = { name: terminal };
+                //         }
+                //         command.execute(`cf ${match[1]}`, terminal);
+                //         return;
+                //     }
+                // }
             }
 
             const command = new Command(context);
