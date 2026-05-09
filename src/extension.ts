@@ -155,14 +155,21 @@ export function activate(context: vscode.ExtensionContext): void {
                 }
                 text = text.trim();
 
-                // Scan backward from the active line to find the nearest "term <name>" directive
-                let detectedTerminal = findTerminalFromContext(activeEditor.document, activeEditor.selection.active.line);
-
-                // If the command starts with "please" or "pls", the user is talking to AI — use the "claude" terminal
-                if (/^(please|pls)\b/i.test(text)) {
-                    detectedTerminal = 'claude';
+                // If the command starts with "please" or "pls", the user is talking to AI — use the
+                // "claude" terminal and strip the prefix from the actual command before running it.
+                const aiPrefixMatch = text.match(/^(please|pls)\b\s*/i);
+                if (aiPrefixMatch) {
+                    const aiCommand = text.slice(aiPrefixMatch[0].length).trim();
+                    const command = new Command(context);
+                    command.switchTerminal('claude');
+                    if (aiCommand) {
+                        await command.execute(aiCommand, { name: 'claude' });
+                    }
+                    return;
                 }
 
+                // Scan backward from the active line to find the nearest "term <name>" directive
+                const detectedTerminal = findTerminalFromContext(activeEditor.document, activeEditor.selection.active.line);
                 if (detectedTerminal) {
                     terminal = { name: detectedTerminal };
                     new Command(context).switchTerminal(detectedTerminal);
