@@ -168,11 +168,21 @@ export function activate(context: vscode.ExtensionContext): void {
                     return;
                 }
 
-                // Scan backward from the active line to find the nearest "term <name>" directive
-                const detectedTerminal = findTerminalFromContext(activeEditor.document, activeEditor.selection.active.line);
-                if (detectedTerminal) {
-                    terminal = { name: detectedTerminal };
-                    new Command(context).switchTerminal(detectedTerminal);
+                // Known pwsh7 commands on the *current* line always run in the pwsh
+                // terminal, regardless of surrounding context. "." is the PowerShell
+                // dot-source operator (only when followed by whitespace).
+                const PWSH_COMMAND_RE = /(?:^|[;&|]\s*)(?:sm|smerge|git|work|mpp|sf|cl|claude)\b/;
+                const PWSH_DOTSOURCE_RE = /(?:^|[;&|]\s*)\.\s/;
+                if (PWSH_COMMAND_RE.test(text) || PWSH_DOTSOURCE_RE.test(text)) {
+                    terminal = { name: 'pwsh' };
+                    new Command(context).switchTerminal('pwsh');
+                } else {
+                    // Scan backward from the active line to find the nearest "term <name>" directive
+                    const detectedTerminal = findTerminalFromContext(activeEditor.document, activeEditor.selection.active.line);
+                    if (detectedTerminal) {
+                        terminal = { name: detectedTerminal };
+                        new Command(context).switchTerminal(detectedTerminal);
+                    }
                 }
 
                 // if (text.startsWith('#')) {

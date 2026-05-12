@@ -1,7 +1,18 @@
 # claude
 /exit
-work command-runner; cl --resume 5a01a75f-d8dd-4500-a466-712699cdc347
 work command-runner; cl
+work command-runner; cl --resume 5a01a75f-d8dd-4500-a466-712699cdc347
+
+pls 
+read C:\tmp\command-runner\src\extension.ts
+Scan backward from the given line, if there is a line with text "cl" (short for claude), it should be executed under "claude" terminal
+
+
+these are known pwsh7 commands and should be always executed under pwsh terminal: sm, smerge, git, work, "." (dot source in powershell), mpp, sf, cl, claude
+
+pwsh
+sm
+
 
 pls 
 read C:\tmp\command-runner\src\extension.ts
