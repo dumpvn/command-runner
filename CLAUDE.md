@@ -1,8 +1,17 @@
 # claude
 /exit
+. gci
 work command-runner; cl
+work command-runner; cl --resume (claudeSession)
 work command-runner; cl --resume 5a01a75f-d8dd-4500-a466-712699cdc347
 lgtm. commit and push the changes. do NOT include co authored by line in the commit message.
+
+
+cl
+
+
+
+
 
 pls 
 read C:\tmp\command-runner\src\extension.ts

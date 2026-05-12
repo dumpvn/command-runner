@@ -63,7 +63,7 @@ function findTerminalFromContext(document: vscode.TextDocument, lineIndex: numbe
     for (let i = lineIndex; i >= 0; i--) {
         const lineText = document.lineAt(i).text.trim();
 
-        if (lineText === 'claude' || lineText === '# claude') {
+        if (lineText === 'claude' || lineText === '# claude' || lineText === 'cl') {
             return 'claude';
         }
 
@@ -168,12 +168,21 @@ export function activate(context: vscode.ExtensionContext): void {
                     return;
                 }
 
+                // "cl"/"claude" — whether standalone, at the start of the line, or
+                // after a chain separator (e.g. "work my-project; cl --resume <id>") —
+                // should run in the claude terminal. In a chain, "work <dir>" only sets
+                // the working directory; "cl"/"claude" is the real command being launched.
+                const CLAUDE_COMMAND_RE = /(?:^|[;&|]\s*)(?:cl|claude)\b/;
+
                 // Known pwsh7 commands on the *current* line always run in the pwsh
                 // terminal, regardless of surrounding context. "." is the PowerShell
                 // dot-source operator (only when followed by whitespace).
-                const PWSH_COMMAND_RE = /(?:^|[;&|]\s*)(?:sm|smerge|git|work|mpp|sf|cl|claude)\b/;
+                const PWSH_COMMAND_RE = /(?:^|[;&|]\s*)(?:sm|smerge|git|work|mpp|sf)\b/;
                 const PWSH_DOTSOURCE_RE = /(?:^|[;&|]\s*)\.\s/;
-                if (PWSH_COMMAND_RE.test(text) || PWSH_DOTSOURCE_RE.test(text)) {
+                if (CLAUDE_COMMAND_RE.test(text)) {
+                    terminal = { name: 'claude' };
+                    new Command(context).switchTerminal('claude');
+                } else if (PWSH_COMMAND_RE.test(text) || PWSH_DOTSOURCE_RE.test(text)) {
                     terminal = { name: 'pwsh' };
                     new Command(context).switchTerminal('pwsh');
                 } else {
