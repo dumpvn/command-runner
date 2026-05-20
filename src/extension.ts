@@ -67,55 +67,6 @@ function findTerminalOverride(document: vscode.TextDocument, lineIndex: number):
     return undefined;
 }
 
-/**
- * Scans backward from the given line to find the nearest "term <name>" directive.
- * @param document - The text document to search in.
- * @param lineIndex - 0-based line number to start searching from (inclusive).
- * @returns The terminal name if found, or undefined.
- */
-function findTerminalFromContext(document: vscode.TextDocument, lineIndex: number): string | undefined {
-    // Once we pass a plain closing fence (```), any opening fences above it belong to
-    // a different code block — don't use their language for terminal detection.
-    let passedClosingFence = false;
-
-    for (let i = lineIndex; i >= 0; i--) {
-        const lineText = document.lineAt(i).text.trim();
-
-        if (lineText === 'claude' || lineText === '# claude' || lineText === 'cl') {
-            return 'claude';
-        }
-
-        if (lineText === 'pwsh' || lineText === '# pwsh') {
-            return 'pwsh';
-        }
-
-        if (lineText.startsWith('term ')) {
-            const parts = lineText.split(/\s+/);
-            if (parts.length >= 2) {
-                return parts[1];
-            }
-        }
-
-        // Support codeblock header as terminal specifier:
-        //   ```pwsh   → run in "pwsh" terminal
-        //   ```claude → run in "claude" terminal
-        if (lineText.startsWith('```')) {
-            const lang = lineText.slice(3).trim();
-            if (lang && !passedClosingFence) {
-                // Opening fence and cursor is inside this block
-                if (lang === 'powershell') {
-                    return 'pwsh'
-                }
-                return lang;
-            } else if (!lang) {
-                // Plain closing fence — cursor is outside this block
-                passedClosingFence = true;
-            }
-        }
-    }
-    return undefined;
-}
-
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 // https://code.visualstudio.com/api/references/vscode-api 
@@ -173,62 +124,20 @@ export function activate(context: vscode.ExtensionContext): void {
                 }
                 text = text.trim();
 
-                // Exception rule: scan backward for a "<# xxx #>" line. If found, the command
-                // runs in terminal "xxx", overriding all other terminal detection logic.
-                const overrideTerminal = findTerminalOverride(activeEditor.document, activeEditor.selection.active.line);
-
-                // If the command starts with "please" or "pls", the user is talking to AI — use the
-                // "claude" terminal (unless overridden) and strip the prefix before running it.
-                const aiPrefixMatch = text.match(/^(please|pls)\b\s*/i);
-                if (aiPrefixMatch) {
-                    const aiTerminal = overrideTerminal || 'claude';
-                    const aiCommand = text.slice(aiPrefixMatch[0].length).trim();
-                    const command = new Command(context);
-                    command.switchTerminal(aiTerminal);
-                    if (aiCommand) {
-                        await command.execute(aiCommand, { name: aiTerminal });
-                    }
-                    return;
-                }
-
-                if (overrideTerminal) {
-                    terminal = { name: overrideTerminal };
-                    new Command(context).switchTerminal(overrideTerminal);
-                } else {
-
-                // "cl"/"claude" — whether standalone, at the start of the line, or
-                // after a chain separator (e.g. "work my-project; cl --resume <id>") —
-                // should run in the claude terminal. In a chain, "work <dir>" only sets
-                // the working directory; "cl"/"claude" is the real command being launched.
-                const CLAUDE_COMMAND_RE = /(?:^|[;&|]\s*)(?:cl|claude)\b/;
-
-                // Known pwsh7 commands on the *current* line always run in the pwsh
-                // terminal, regardless of surrounding context. "." is the PowerShell
-                // dot-source operator (only when followed by whitespace).
-                const PWSH_COMMAND_RE = /(?:^|[;&|]\s*)(?:sm|smerge|git|work|mpp|sf)\b/;
-                const PWSH_DOTSOURCE_RE = /(?:^|[;&|]\s*)\.\s/;
-                if (CLAUDE_COMMAND_RE.test(text)) {
-                    terminal = { name: 'claude' };
-                    new Command(context).switchTerminal('claude');
-                } else if (PWSH_COMMAND_RE.test(text) || PWSH_DOTSOURCE_RE.test(text)) {
-                    terminal = { name: 'pwsh' };
-                    new Command(context).switchTerminal('pwsh');
-                } else {
-                    // Scan backward from the active line to find the nearest "term <name>" directive
-                    let detectedTerminal = findTerminalFromContext(activeEditor.document, activeEditor.selection.active.line);
-                    if (!detectedTerminal) {
-                        // Final fallback: use the active file's basename (without extension) as the terminal name
-                        const filePath = activeEditor.document.uri.fsPath;
-                        if (filePath) {
-                            detectedTerminal = path.basename(filePath, path.extname(filePath));
-                        }
-                    }
-                    if (detectedTerminal) {
-                        terminal = { name: detectedTerminal };
-                        new Command(context).switchTerminal(detectedTerminal);
+                // Terminal resolution — only two rules:
+                //   1. Exception: nearest "<# xxx #>" line above the cursor → terminal "xxx".
+                //   2. Fallback: active file's basename without extension.
+                let resolvedTerminal = findTerminalOverride(activeEditor.document, activeEditor.selection.active.line);
+                if (!resolvedTerminal) {
+                    const filePath = activeEditor.document.uri.fsPath;
+                    if (filePath) {
+                        resolvedTerminal = path.basename(filePath, path.extname(filePath)) || undefined;
                     }
                 }
-                } // end of !overrideTerminal branch
+                if (resolvedTerminal) {
+                    terminal = { name: resolvedTerminal };
+                    new Command(context).switchTerminal(resolvedTerminal);
+                }
 
                 // if (text.startsWith('#')) {
                 //     vscode.env.clipboard.writeText(text);
