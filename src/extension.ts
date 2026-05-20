@@ -50,6 +50,24 @@ function getCodeBlockAboveLine(document: vscode.TextDocument, lineIndex: number)
 }
 
 /**
+ * Scans backward from the given line to find a "<# xxx #>" terminal override.
+ * This is an exception rule that takes precedence over all other terminal detection.
+ * @param document - The text document to search in.
+ * @param lineIndex - 0-based line number to start searching from (inclusive).
+ * @returns The terminal name if an override is found, or undefined.
+ */
+function findTerminalOverride(document: vscode.TextDocument, lineIndex: number): string | undefined {
+    for (let i = lineIndex; i >= 0; i--) {
+        const lineText = document.lineAt(i).text.trim();
+        const match = lineText.match(/^<#\s+(\S+)\s+#>$/);
+        if (match) {
+            return match[1];
+        }
+    }
+    return undefined;
+}
+
+/**
  * Scans backward from the given line to find the nearest "term <name>" directive.
  * @param document - The text document to search in.
  * @param lineIndex - 0-based line number to start searching from (inclusive).
@@ -95,7 +113,7 @@ function findTerminalFromContext(document: vscode.TextDocument, lineIndex: numbe
             }
         }
     }
-    return 'pwsh';
+    return undefined;
 }
 
 // this method is called when your extension is activated
@@ -155,18 +173,28 @@ export function activate(context: vscode.ExtensionContext): void {
                 }
                 text = text.trim();
 
+                // Exception rule: scan backward for a "<# xxx #>" line. If found, the command
+                // runs in terminal "xxx", overriding all other terminal detection logic.
+                const overrideTerminal = findTerminalOverride(activeEditor.document, activeEditor.selection.active.line);
+
                 // If the command starts with "please" or "pls", the user is talking to AI — use the
-                // "claude" terminal and strip the prefix from the actual command before running it.
+                // "claude" terminal (unless overridden) and strip the prefix before running it.
                 const aiPrefixMatch = text.match(/^(please|pls)\b\s*/i);
                 if (aiPrefixMatch) {
+                    const aiTerminal = overrideTerminal || 'claude';
                     const aiCommand = text.slice(aiPrefixMatch[0].length).trim();
                     const command = new Command(context);
-                    command.switchTerminal('claude');
+                    command.switchTerminal(aiTerminal);
                     if (aiCommand) {
-                        await command.execute(aiCommand, { name: 'claude' });
+                        await command.execute(aiCommand, { name: aiTerminal });
                     }
                     return;
                 }
+
+                if (overrideTerminal) {
+                    terminal = { name: overrideTerminal };
+                    new Command(context).switchTerminal(overrideTerminal);
+                } else {
 
                 // "cl"/"claude" — whether standalone, at the start of the line, or
                 // after a chain separator (e.g. "work my-project; cl --resume <id>") —
@@ -187,12 +215,20 @@ export function activate(context: vscode.ExtensionContext): void {
                     new Command(context).switchTerminal('pwsh');
                 } else {
                     // Scan backward from the active line to find the nearest "term <name>" directive
-                    const detectedTerminal = findTerminalFromContext(activeEditor.document, activeEditor.selection.active.line);
+                    let detectedTerminal = findTerminalFromContext(activeEditor.document, activeEditor.selection.active.line);
+                    if (!detectedTerminal) {
+                        // Final fallback: use the active file's basename (without extension) as the terminal name
+                        const filePath = activeEditor.document.uri.fsPath;
+                        if (filePath) {
+                            detectedTerminal = path.basename(filePath, path.extname(filePath));
+                        }
+                    }
                     if (detectedTerminal) {
                         terminal = { name: detectedTerminal };
                         new Command(context).switchTerminal(detectedTerminal);
                     }
                 }
+                } // end of !overrideTerminal branch
 
                 // if (text.startsWith('#')) {
                 //     vscode.env.clipboard.writeText(text);
