@@ -59,6 +59,9 @@ function getCodeBlockAboveLine(document: vscode.TextDocument, lineIndex: number)
 function findTerminalOverride(document: vscode.TextDocument, lineIndex: number): string | undefined {
     for (let i = lineIndex; i >= 0; i--) {
         const lineText = document.lineAt(i).text.trim();
+        if (/^<#\s*#>$/.test(lineText)) {
+            return undefined;
+        }
         const match = lineText.match(/^<#\s+(\S+)\s+#>$/);
         if (match) {
             return match[1];
