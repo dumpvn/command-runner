@@ -56,6 +56,16 @@ function getCodeBlockAboveLine(document: vscode.TextDocument, lineIndex: number)
  * @param lineIndex - 0-based line number to start searching from (inclusive).
  * @returns The terminal name if an override is found, or undefined.
  */
+function closeTerminalForFile(filePath: string): void {
+    const base = path.basename(filePath, path.extname(filePath));
+    if (!base) return;
+    for (const term of vscode.window.terminals) {
+        if (term.name === base) {
+            term.dispose();
+        }
+    }
+}
+
 function findTerminalOverride(document: vscode.TextDocument, lineIndex: number): string | undefined {
     for (let i = lineIndex; i >= 0; i--) {
         const lineText = document.lineAt(i).text.trim();
@@ -84,6 +94,16 @@ export function activate(context: vscode.ExtensionContext): void {
     // The command has been defined in the package.json file
     // Now provide the implementation of the command with registerCommand
     // The commandId parameter must match the command field in package.json
+    context.subscriptions.push(
+        vscode.window.tabGroups.onDidChangeTabs(e => {
+            for (const tab of e.closed) {
+                if (tab.input instanceof vscode.TabInputText) {
+                    closeTerminalForFile(tab.input.uri.fsPath);
+                }
+            }
+        })
+    );
+
     context.subscriptions.push(
         vscode.commands.registerCommand('command-runner.runChatCopilot', async () => {
             const command = new Command(context);

@@ -55,8 +55,8 @@ export default () => cache({
     },
 
     selections() {
-        return this.editor()?.selections.sort(
-            (sl1, sl2) => sl1.active.line > sl2.active.line ? 1 : -1
+        return this.editor()?.selections.slice().sort(
+            (sl1: vscode.Selection, sl2: vscode.Selection) => sl1.active.line > sl2.active.line ? 1 : -1
         );
     },
 
@@ -101,7 +101,7 @@ export default () => cache({
         const selections = this.selections();
 
         if (selections && selections.length) {
-            return selections.map(sl => sl.active.line + 1).join();
+            return selections.map((sl: vscode.Selection) => sl.active.line + 1).join();
         }
 
         return '';
@@ -120,7 +120,7 @@ export default () => cache({
     selectedPositionList(): string {
         const selections = this.selections();
         if (selections && selections.length) {
-            return selections.map(sl => [sl.active.line + 1, sl.active.character].join(',')).join(' ');
+            return selections.map((sl: vscode.Selection) => [sl.active.line + 1, sl.active.character].join(',')).join(' ');
         }
         return '';
     },
@@ -140,7 +140,7 @@ export default () => cache({
         const selections = this.selections();
 
         if (selections && selections.length && document) {
-            return selections.map(sl => document.getText(sl)).join(' ');
+            return selections.map((sl: vscode.Selection) => document.getText(sl)).join(' ');
         }
 
         return '';
@@ -152,7 +152,7 @@ export default () => cache({
 
         if (selections && selections.length && document) {
             // return selections.map(sl => document.getText(sl)).join('\n').trim();
-            return selections.map(sl => document.getText(sl)).join('\n'); // no trim
+            return selections.map((sl: vscode.Selection) => document.getText(sl)).join('\n'); // no trim
         }
 
         return '';
