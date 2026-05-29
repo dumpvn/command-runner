@@ -147,6 +147,23 @@ export function activate(context: vscode.ExtensionContext): void {
                 }
                 text = text.trim();
 
+                // Running a named override line "<# xxx #>" / "<!-- xxx -->" means:
+                // close terminal "xxx" and delete the line.
+                const overrideMatch = text.match(/^<#\s+(\S+)\s+#>$/) || text.match(/^<!--\s+(\S+)\s+-->$/);
+                if (overrideMatch) {
+                    const terminalName = overrideMatch[1];
+                    for (const term of vscode.window.terminals) {
+                        if (term.name === terminalName) {
+                            term.dispose();
+                        }
+                    }
+                    const line = activeEditor.selection.active.line;
+                    const edit = new vscode.WorkspaceEdit();
+                    edit.delete(activeEditor.document.uri, activeEditor.document.lineAt(line).rangeIncludingLineBreak);
+                    await vscode.workspace.applyEdit(edit);
+                    return;
+                }
+
                 // Terminal resolution — only two rules:
                 //   1. Exception: nearest "<# xxx #>" line above the cursor → terminal "xxx".
                 //   2. Fallback: active file's basename without extension.
