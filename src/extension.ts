@@ -105,6 +105,18 @@ export function activate(context: vscode.ExtensionContext): void {
     );
 
     context.subscriptions.push(
+        vscode.commands.registerCommand('command-runner.renameTerminalToActiveFile', async () => {
+            const editor = vscode.window.activeTextEditor;
+            if (!editor) return;
+            const fsPath = editor.document.uri.fsPath;
+            if (!fsPath) return;
+            const name = path.basename(fsPath, path.extname(fsPath));
+            if (!name) return;
+            await vscode.commands.executeCommand('workbench.action.terminal.renameWithArg', { name });
+        })
+    );
+
+    context.subscriptions.push(
         vscode.commands.registerCommand('command-runner.runChatCopilot', async () => {
             const command = new Command(context);
             const activeEditor = vscode.window.activeTextEditor;

@@ -23,7 +23,8 @@
     "activationEvents": [
         "onCommand:command-runner.run",
         "onCommand:command-runner.runInTerminal",
-        "onCommand:command-runner.runChatCopilot"
+        "onCommand:command-runner.runChatCopilot",
+        "onCommand:command-runner.renameTerminalToActiveFile"
     ],
     "main": "./out/extension.js",
     "contributes": {
@@ -35,6 +36,10 @@
             {
                 "command": "command-runner.runInTerminal",
                 "title": "Run In Terminal"
+            },
+            {
+                "command": "command-runner.renameTerminalToActiveFile",
+                "title": "Rename Terminal to Active File Basename"
             }
         ],
         "configuration": {
