@@ -24,7 +24,8 @@
         "onCommand:command-runner.run",
         "onCommand:command-runner.runInTerminal",
         "onCommand:command-runner.runChatCopilot",
-        "onCommand:command-runner.renameTerminalToActiveFile"
+        "onCommand:command-runner.renameTerminalToActiveFile",
+        "onCommand:command-runner.readAloud"
     ],
     "main": "./out/extension.js",
     "contributes": {
@@ -40,6 +41,10 @@
             {
                 "command": "command-runner.renameTerminalToActiveFile",
                 "title": "Rename Terminal to Active File Basename"
+            },
+            {
+                "command": "command-runner.readAloud",
+                "title": "Read Aloud"
             }
         ],
         "configuration": {
@@ -142,6 +147,20 @@
                     "default": true,
                     "description": "Show 'Run Command' in explorer context menu",
                     "scope": "resource"
+                },
+                "command-runner.readAloud.voice": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Installed SAPI voice name for Read Aloud (empty = system default). e.g. 'Microsoft Zira Desktop'.",
+                    "scope": "resource"
+                },
+                "command-runner.readAloud.rate": {
+                    "type": "number",
+                    "default": 0,
+                    "minimum": -10,
+                    "maximum": 10,
+                    "description": "Read Aloud speaking rate (System.Speech scale, -10 to 10).",
+                    "scope": "resource"
                 }
             }
         },
@@ -161,6 +180,11 @@
                 "command": "command-runner.runChatCopilot",
                 "key": "ctrl+alt+enter",
                 "when": "editorTextFocus"
+            },
+            {
+                "command": "command-runner.readAloud",
+                "key": "ctrl+alt+r",
+                "when": "editorTextFocus"
             }
         ],
         "menus": {
@@ -173,6 +197,11 @@
                 {
                     "when": "editorHasSelection && !inOutput && config.command-runner.showRunCommandInEditorContextMenu",
                     "command": "command-runner.runInTerminal",
+                    "group": "navigation"
+                },
+                {
+                    "when": "editorHasSelection && !inOutput",
+                    "command": "command-runner.readAloud",
                     "group": "navigation"
                 }
             ],

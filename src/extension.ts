@@ -6,6 +6,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import Command, { TerminalOptions } from './command';
+import { speak } from './readAloud';
 
 
 
@@ -113,6 +114,18 @@ export function activate(context: vscode.ExtensionContext): void {
             const name = path.basename(fsPath, path.extname(fsPath));
             if (!name) return;
             await vscode.commands.executeCommand('workbench.action.terminal.renameWithArg', { name });
+        })
+    );
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand('command-runner.readAloud', () => {
+            const editor = vscode.window.activeTextEditor;
+            if (!editor) return;
+            let text = editor.document.getText(editor.selection);
+            if (!text) {
+                text = editor.document.lineAt(editor.selection.active.line).text;
+            }
+            speak(text);
         })
     );
 
