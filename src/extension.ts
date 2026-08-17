@@ -7,6 +7,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import Command, { TerminalOptions } from './command';
 import { speak } from './readAloud';
+import { setupSessionRestore } from './sessionRestore';
 
 
 
@@ -90,6 +91,8 @@ export function activate(context: vscode.ExtensionContext): void {
     // Use the console to output diagnostic information (console.log) and errors (console.error)
     // This line of code will only be executed once when your extension is activated
     console.log('Congratulations, your extension "command-runner" is now active!');
+
+    setupSessionRestore(context);
 
 
     // The command has been defined in the package.json file

@@ -25,7 +25,8 @@
         "onCommand:command-runner.runInTerminal",
         "onCommand:command-runner.runChatCopilot",
         "onCommand:command-runner.renameTerminalToActiveFile",
-        "onCommand:command-runner.readAloud"
+        "onCommand:command-runner.readAloud",
+        "onStartupFinished"
     ],
     "main": "./out/extension.js",
     "contributes": {
