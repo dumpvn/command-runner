@@ -108,6 +108,41 @@ export function activate(context: vscode.ExtensionContext): void {
         })
     );
 
+    // When the active editor changes, reveal a terminal whose name matches the
+    // file's basename without extension (abc.md -> "abc"). Keeps editor focus;
+    // does nothing when no such terminal exists.
+    context.subscriptions.push(
+        vscode.window.onDidChangeActiveTextEditor(editor => {
+            const uri = editor?.document.uri;
+            if (!uri || uri.scheme !== 'file') return;
+            const name = path.basename(uri.fsPath, path.extname(uri.fsPath));
+            if (!name) return;
+            const term = vscode.window.terminals.find(t => t.name === name);
+            if (term) term.show(true);
+        })
+    );
+
+    // When the active terminal changes, reveal a file tab whose basename without
+    // extension matches the terminal name ("abc" -> abc.md). Does nothing when no
+    // such tab exists.
+    context.subscriptions.push(
+        vscode.window.onDidChangeActiveTerminal(term => {
+            if (!term) return;
+            const name = term.name;
+            for (const group of vscode.window.tabGroups.all) {
+                for (const tab of group.tabs) {
+                    if (tab.input instanceof vscode.TabInputText && tab.input.uri.scheme === 'file') {
+                        const uri = tab.input.uri;
+                        if (path.basename(uri.fsPath, path.extname(uri.fsPath)) === name) {
+                            void vscode.window.showTextDocument(uri, { preview: false });
+                            return;
+                        }
+                    }
+                }
+            }
+        })
+    );
+
     context.subscriptions.push(
         vscode.commands.registerCommand('command-runner.renameTerminalToActiveFile', async () => {
             const editor = vscode.window.activeTextEditor;
