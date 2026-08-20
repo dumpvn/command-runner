@@ -3,7 +3,16 @@ on:
   release:
     types:
       - published
+  push:
+    branches: [ master, main ]
   workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   release:
@@ -22,5 +31,10 @@ jobs:
       - name: Install vsce
         run: npm i -g @vscode/vsce
 
-      - name: Publish
-        run: vsce publish -p ${{ secrets.VSCE_PAT }}
+      - name: Bump version and publish
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          npm version patch -m "%s [skip ci]"
+          vsce publish -p ${{ secrets.VSCE_PAT }}
+          git push --follow-tags
