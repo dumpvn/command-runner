@@ -228,19 +228,14 @@ export function activate(context: vscode.ExtensionContext): void {
                 }
 
                 // Terminal resolution:
-                //   0. Highest priority — if a terminal named "pwsh" exists, use it.
-                //   1. Exception: nearest "<# xxx #>" line above the cursor → terminal "xxx".
+                //   1. Nearest "<# xxx #>" / "<!-- xxx -->" line above the cursor → terminal "xxx"
+                //      (e.g. "<!-- pwsh -->" routes to the pwsh terminal).
                 //   2. Fallback: active file's basename without extension.
-                let resolvedTerminal: string | undefined;
-                if (vscode.window.terminals.some(t => t.name === 'pwsh')) {
-                    resolvedTerminal = 'pwsh';
-                } else {
-                    resolvedTerminal = findTerminalOverride(activeEditor.document, activeEditor.selection.active.line);
-                    if (!resolvedTerminal) {
-                        const filePath = activeEditor.document.uri.fsPath;
-                        if (filePath) {
-                            resolvedTerminal = path.basename(filePath, path.extname(filePath)) || undefined;
-                        }
+                let resolvedTerminal: string | undefined = findTerminalOverride(activeEditor.document, activeEditor.selection.active.line);
+                if (!resolvedTerminal) {
+                    const filePath = activeEditor.document.uri.fsPath;
+                    if (filePath) {
+                        resolvedTerminal = path.basename(filePath, path.extname(filePath)) || undefined;
                     }
                 }
                 if (resolvedTerminal) {
