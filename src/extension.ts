@@ -82,6 +82,21 @@ function findTerminalOverride(document: vscode.TextDocument, lineIndex: number):
     return undefined;
 }
 
+/**
+ * Resolves an override token to an existing terminal name using "*" as a wildcard.
+ * "*DAD-2301*" matches names containing DAD-2301, "DAD-2301*" names starting with it.
+ * Prefers the active terminal when it matches, otherwise the first terminal in list order.
+ * @returns the matching terminal's name, or undefined if none match.
+ */
+function matchTerminalByGlob(pattern: string): string | undefined {
+    const regex = new RegExp('^' + pattern.split('*').map(seg => seg.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('.*') + '$');
+    const active = vscode.window.activeTerminal;
+    if (active && regex.test(active.name)) {
+        return active.name;
+    }
+    return vscode.window.terminals.find(t => regex.test(t.name))?.name;
+}
+
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 // https://code.visualstudio.com/api/references/vscode-api 
@@ -229,9 +244,13 @@ export function activate(context: vscode.ExtensionContext): void {
 
                 // Terminal resolution:
                 //   1. Nearest "<# xxx #>" / "<!-- xxx -->" line above the cursor → terminal "xxx"
-                //      (e.g. "<!-- pwsh -->" routes to the pwsh terminal).
+                //      (e.g. "<!-- pwsh -->" routes to the pwsh terminal). A "*" in the name is a
+                //      wildcard matched against existing terminals ("<!-- *DAD-2301* -->").
                 //   2. Fallback: active file's basename without extension.
                 let resolvedTerminal: string | undefined = findTerminalOverride(activeEditor.document, activeEditor.selection.active.line);
+                if (resolvedTerminal && resolvedTerminal.includes('*')) {
+                    resolvedTerminal = matchTerminalByGlob(resolvedTerminal);
+                }
                 if (!resolvedTerminal) {
                     const filePath = activeEditor.document.uri.fsPath;
                     if (filePath) {
