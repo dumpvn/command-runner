@@ -464,7 +464,19 @@ export function activate(context: vscode.ExtensionContext): void {
             if (typeof terminal === 'string') {
                 terminal = { name: terminal };
             }
-            command.executeSelectText(terminal);
+
+            // Text routed by a leading ">" runs with the ">" (and one following space)
+            // stripped from each line before it reaches the terminal.
+            const editor = vscode.window.activeTextEditor;
+            const raw = editor
+                ? (editor.document.getText(editor.selection) || editor.document.lineAt(editor.selection.active.line).text)
+                : '';
+            if (raw.trim().startsWith('>')) {
+                const stripped = raw.split('\n').map(line => line.replace(/^(\s*)> ?/, '$1')).join('\n');
+                command.execute(stripped, terminal);
+            } else {
+                command.executeSelectText(terminal);
+            }
         })
     );
 
