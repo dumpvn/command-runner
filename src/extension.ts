@@ -68,6 +68,26 @@ function closeTerminalForFile(filePath: string): void {
     }
 }
 
+const RUN_INDICATOR = '👈';
+
+/**
+ * Moves the run indicator: strips "👈" from every line, then appends it to targetLine.
+ * Marks the last command run from this file so the most recent step is visible.
+ */
+async function markLastRun(document: vscode.TextDocument, targetLine: number): Promise<void> {
+    const edit = new vscode.WorkspaceEdit();
+    for (let i = 0; i < document.lineCount; i++) {
+        const line = document.lineAt(i);
+        if (i === targetLine) {
+            const cleaned = line.text.replace(/\s*👈/g, '').replace(/\s+$/, '');
+            edit.replace(document.uri, line.range, cleaned + ' ' + RUN_INDICATOR);
+        } else if (line.text.includes(RUN_INDICATOR)) {
+            edit.replace(document.uri, line.range, line.text.replace(/\s*👈/g, ''));
+        }
+    }
+    await vscode.workspace.applyEdit(edit);
+}
+
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 // https://code.visualstudio.com/api/references/vscode-api 
@@ -465,15 +485,23 @@ export function activate(context: vscode.ExtensionContext): void {
                 terminal = { name: terminal };
             }
 
-            // Text routed by a leading ">" runs with the ">" (and one following space)
-            // stripped from each line before it reaches the terminal.
             const editor = vscode.window.activeTextEditor;
-            const raw = editor
-                ? (editor.document.getText(editor.selection) || editor.document.lineAt(editor.selection.active.line).text)
-                : '';
-            if (raw.trim().startsWith('>')) {
-                const stripped = raw.split('\n').map(line => line.replace(/^(\s*)> ?/, '$1')).join('\n');
-                command.execute(stripped, terminal);
+            if (editor) {
+                // Strip a previous run indicator so re-runs stay clean, then drop a leading
+                // ">" (and one following space) from each ">"-routed line before sending.
+                let raw = (editor.document.getText(editor.selection) || editor.document.lineAt(editor.selection.active.line).text)
+                    .replace(/\s*👈/g, '');
+                if (raw.trim().startsWith('>')) {
+                    raw = raw.split('\n').map(line => line.replace(/^(\s*)> ?/, '$1')).join('\n');
+                }
+                command.execute(raw, terminal);
+
+                // Move the run indicator to the end of the line we just ran.
+                const sel = editor.selection;
+                const targetLine = sel.isEmpty
+                    ? sel.active.line
+                    : (sel.end.character === 0 && sel.end.line > sel.start.line ? sel.end.line - 1 : sel.end.line);
+                await markLastRun(editor.document, targetLine);
             } else {
                 command.executeSelectText(terminal);
             }
