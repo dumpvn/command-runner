@@ -496,12 +496,14 @@ export function activate(context: vscode.ExtensionContext): void {
                 }
                 command.execute(raw, terminal);
 
-                // Move the run indicator to the end of the line we just ran.
-                const sel = editor.selection;
-                const targetLine = sel.isEmpty
-                    ? sel.active.line
-                    : (sel.end.character === 0 && sel.end.line > sel.start.line ? sel.end.line - 1 : sel.end.line);
-                await markLastRun(editor.document, targetLine);
+                // Move the run indicator to the end of the line we just ran (skip blank runs).
+                if (raw.trim()) {
+                    const sel = editor.selection;
+                    const targetLine = sel.isEmpty
+                        ? sel.active.line
+                        : (sel.end.character === 0 && sel.end.line > sel.start.line ? sel.end.line - 1 : sel.end.line);
+                    await markLastRun(editor.document, targetLine);
+                }
             } else {
                 command.executeSelectText(terminal);
             }
