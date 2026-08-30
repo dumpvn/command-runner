@@ -71,20 +71,14 @@ function closeTerminalForFile(filePath: string): void {
 const RUN_INDICATOR = '👈';
 
 /**
- * Moves the run indicator: strips "👈" from every line, then appends it to targetLine.
- * Marks the last command run from this file so the most recent step is visible.
+ * Appends the run indicator "👈" to targetLine so every executed line stays marked.
+ * Other lines are left untouched; a line already marked is not changed.
  */
-async function markLastRun(document: vscode.TextDocument, targetLine: number): Promise<void> {
+async function markRunLine(document: vscode.TextDocument, targetLine: number): Promise<void> {
+    const line = document.lineAt(targetLine);
+    if (line.text.includes(RUN_INDICATOR)) return;
     const edit = new vscode.WorkspaceEdit();
-    for (let i = 0; i < document.lineCount; i++) {
-        const line = document.lineAt(i);
-        if (i === targetLine) {
-            const cleaned = line.text.replace(/\s*👈/g, '').replace(/\s+$/, '');
-            edit.replace(document.uri, line.range, cleaned + ' ' + RUN_INDICATOR);
-        } else if (line.text.includes(RUN_INDICATOR)) {
-            edit.replace(document.uri, line.range, line.text.replace(/\s*👈/g, ''));
-        }
-    }
+    edit.replace(document.uri, line.range, line.text.replace(/\s+$/, '') + ' ' + RUN_INDICATOR);
     await vscode.workspace.applyEdit(edit);
 }
 
@@ -496,13 +490,13 @@ export function activate(context: vscode.ExtensionContext): void {
                 }
                 command.execute(raw, terminal);
 
-                // Move the run indicator to the end of the line we just ran (skip blank runs).
+                // Mark the line we just ran with the run indicator (skip blank runs).
                 if (raw.trim()) {
                     const sel = editor.selection;
                     const targetLine = sel.isEmpty
                         ? sel.active.line
                         : (sel.end.character === 0 && sel.end.line > sel.start.line ? sel.end.line - 1 : sel.end.line);
-                    await markLastRun(editor.document, targetLine);
+                    await markRunLine(editor.document, targetLine);
                 }
             } else {
                 command.executeSelectText(terminal);
