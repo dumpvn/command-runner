@@ -46,6 +46,49 @@
             {
                 "command": "command-runner.readAloud",
                 "title": "Read Aloud"
+            },
+            {
+                "command": "command-runner.task.setBlocked",
+                "title": "Set Blocked",
+                "icon": "$(error)"
+            },
+            {
+                "command": "command-runner.task.setInProgress",
+                "title": "Set In Progress",
+                "icon": "$(play)"
+            },
+            {
+                "command": "command-runner.task.setWaiting",
+                "title": "Set Waiting/Review",
+                "icon": "$(watch)"
+            },
+            {
+                "command": "command-runner.task.setTodo",
+                "title": "Set Todo",
+                "icon": "$(circle-outline)"
+            },
+            {
+                "command": "command-runner.task.setDone",
+                "title": "Set Done",
+                "icon": "$(pass-filled)"
+            },
+            {
+                "command": "command-runner.task.clear",
+                "title": "Clear Status"
+            },
+            {
+                "command": "command-runner.task.reopen",
+                "title": "Reopen Terminal",
+                "icon": "$(terminal)"
+            },
+            {
+                "command": "command-runner.task.remove",
+                "title": "Remove Task",
+                "icon": "$(trash)"
+            },
+            {
+                "command": "command-runner.task.focus",
+                "title": "Focus Terminal"
             }
         ],
         "configuration": {
@@ -212,8 +255,88 @@
                     "command": "command-runner.run",
                     "group": "navigation"
                 }
+            ],
+            "view/item/context": [
+                {
+                    "command": "command-runner.task.setInProgress",
+                    "when": "view == command-runner.tasks && viewItem == task-open",
+                    "group": "inline@1"
+                },
+                {
+                    "command": "command-runner.task.setBlocked",
+                    "when": "view == command-runner.tasks && viewItem == task-open",
+                    "group": "inline@2"
+                },
+                {
+                    "command": "command-runner.task.setDone",
+                    "when": "view == command-runner.tasks && viewItem == task-open",
+                    "group": "inline@3"
+                },
+                {
+                    "command": "command-runner.task.setBlocked",
+                    "when": "view == command-runner.tasks",
+                    "group": "1_status@1"
+                },
+                {
+                    "command": "command-runner.task.setInProgress",
+                    "when": "view == command-runner.tasks",
+                    "group": "1_status@2"
+                },
+                {
+                    "command": "command-runner.task.setWaiting",
+                    "when": "view == command-runner.tasks",
+                    "group": "1_status@3"
+                },
+                {
+                    "command": "command-runner.task.setTodo",
+                    "when": "view == command-runner.tasks",
+                    "group": "1_status@4"
+                },
+                {
+                    "command": "command-runner.task.setDone",
+                    "when": "view == command-runner.tasks",
+                    "group": "1_status@5"
+                },
+                {
+                    "command": "command-runner.task.clear",
+                    "when": "view == command-runner.tasks",
+                    "group": "2_manage@1"
+                },
+                {
+                    "command": "command-runner.task.reopen",
+                    "when": "view == command-runner.tasks && viewItem == task-closed",
+                    "group": "inline@1"
+                },
+                {
+                    "command": "command-runner.task.remove",
+                    "when": "view == command-runner.tasks && viewItem == task-closed",
+                    "group": "2_manage@2"
+                }
             ]
-        }
+        },
+        "viewsContainers": {
+            "activitybar": [
+                {
+                    "id": "command-runner",
+                    "title": "Command Runner",
+                    "icon": "resource/tasks.svg"
+                }
+            ]
+        },
+        "views": {
+            "command-runner": [
+                {
+                    "id": "command-runner.tasks",
+                    "name": "Tasks"
+                }
+            ]
+        },
+        "viewsWelcome": [
+            {
+                "view": "command-runner.tasks",
+                "contents": "No tasks yet.\nEach terminal appears here as a task.\nRight-click a task to set its status (Blocked, In Progress, Waiting, Todo, Done)."
+            }
+        ]
     },
     "scripts": {
         "vscode:prepublish": "npm run compile",

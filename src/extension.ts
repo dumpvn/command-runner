@@ -8,6 +8,7 @@ import * as path from 'path';
 import Command, { TerminalOptions } from './command';
 import { speak } from './readAloud';
 import { setupSessionRestore } from './sessionRestore';
+import { TaskStore, TaskBoardProvider, TaskItem, TaskStatus } from './taskBoard';
 
 
 
@@ -82,6 +83,47 @@ async function markRunLine(document: vscode.TextDocument, targetLine: number): P
     await vscode.workspace.applyEdit(edit);
 }
 
+/** Registers the Tasks tree view and its status/manage commands. */
+function setupTaskBoard(context: vscode.ExtensionContext): void {
+    const store = new TaskStore(context.workspaceState);
+    const provider = new TaskBoardProvider(store);
+    context.subscriptions.push(
+        vscode.window.registerTreeDataProvider('command-runner.tasks', provider),
+        vscode.window.onDidOpenTerminal(() => provider.refresh()),
+        vscode.window.onDidCloseTerminal(() => provider.refresh()),
+        vscode.window.onDidChangeActiveTerminal(() => provider.refresh()),
+    );
+
+    const setStatus = (status: TaskStatus) => async (item?: TaskItem) => {
+        if (!item) return;
+        await store.set(item.name, status);
+        provider.refresh();
+    };
+    const removeTask = async (item?: TaskItem) => {
+        if (!item) return;
+        await store.remove(item.name);
+        provider.refresh();
+    };
+    const reopen = (item?: TaskItem) => {
+        if (!item) return;
+        const term = vscode.window.terminals.find(t => t.name === item.name)
+            ?? vscode.window.createTerminal({ name: item.name });
+        term.show();
+    };
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand('command-runner.task.setBlocked', setStatus('blocked')),
+        vscode.commands.registerCommand('command-runner.task.setInProgress', setStatus('inProgress')),
+        vscode.commands.registerCommand('command-runner.task.setWaiting', setStatus('waiting')),
+        vscode.commands.registerCommand('command-runner.task.setTodo', setStatus('todo')),
+        vscode.commands.registerCommand('command-runner.task.setDone', setStatus('done')),
+        vscode.commands.registerCommand('command-runner.task.clear', removeTask),
+        vscode.commands.registerCommand('command-runner.task.remove', removeTask),
+        vscode.commands.registerCommand('command-runner.task.reopen', reopen),
+        vscode.commands.registerCommand('command-runner.task.focus', reopen),
+    );
+}
+
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 // https://code.visualstudio.com/api/references/vscode-api 
@@ -93,6 +135,8 @@ export function activate(context: vscode.ExtensionContext): void {
     console.log('Congratulations, your extension "command-runner" is now active!');
 
     setupSessionRestore(context);
+
+    setupTaskBoard(context);
 
 
     // The command has been defined in the package.json file
