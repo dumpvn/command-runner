@@ -2,6 +2,7 @@
 
 import * as vscode from 'vscode';
 import * as path from 'path';
+import { ClaudeState, ClaudeStatusWatcher } from './claudeStatus';
 
 export type TaskStatus = 'blocked' | 'inProgress' | 'waiting' | 'todo' | 'done';
 
@@ -17,6 +18,13 @@ const STATUS: Record<TaskStatus, StatusMeta> = {
     waiting:    { label: 'Waiting/Review',  icon: 'watch',          color: 'charts.blue'   },
     todo:       { label: 'Todo',            icon: 'circle-outline'                         },
     done:       { label: 'Done',            icon: 'pass-filled',    color: 'charts.green'  },
+};
+
+// Live Claude session state takes over the row's icon/text when present.
+const CLAUDE_META: Record<ClaudeState, StatusMeta> = {
+    running: { label: 'Running',           icon: 'loading~spin', color: 'charts.yellow' },
+    input:   { label: 'Needs your input',  icon: 'bell',         color: 'charts.orange' },
+    idle:    { label: 'Idle',              icon: 'circle-outline'                       },
 };
 
 const STORE_KEY = 'COMMAND_RUNNER_TASKS';
@@ -52,13 +60,15 @@ export class TaskItem extends vscode.TreeItem {
         public readonly hasTerminal: boolean,
         public readonly fileUri: vscode.Uri | undefined,
         active: boolean,
+        claude?: ClaudeState,
     ) {
         // Bold the whole label for the active terminal's / active editor's task.
         super(active ? { label: name, highlights: [[0, name.length]] } : name);
-        const open = hasTerminal || !!fileUri;
-        const meta = STATUS[status];
-        this.description = open ? meta.label : `${meta.label} · closed`;
-        this.tooltip = `${name} — ${meta.label}${open ? '' : ' (closed)'}`;
+        const open = hasTerminal || !!fileUri || !!claude;
+        // Live-first: a Claude session state takes over the icon/text; else the manual status.
+        const meta = claude ? CLAUDE_META[claude] : STATUS[status];
+        this.description = claude ? meta.label : (open ? meta.label : `${meta.label} · closed`);
+        this.tooltip = claude ? `${name} — Claude: ${meta.label}` : `${name} — ${meta.label}${open ? '' : ' (closed)'}`;
         this.iconPath = new vscode.ThemeIcon(meta.icon, meta.color ? new vscode.ThemeColor(meta.color) : undefined);
         this.contextValue = open ? 'task-open' : 'task-closed';
         this.command = { command: 'command-runner.task.focus', title: 'Activate', arguments: [this] };
@@ -69,7 +79,7 @@ export class TaskBoardProvider implements vscode.TreeDataProvider<TaskItem> {
     private _onDidChangeTreeData = new vscode.EventEmitter<TaskItem | undefined | void>();
     readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
 
-    constructor(private store: TaskStore) {}
+    constructor(private store: TaskStore, private claude?: ClaudeStatusWatcher) {}
 
     refresh(): void {
         this._onDidChangeTreeData.fire();
@@ -99,8 +109,9 @@ export class TaskBoardProvider implements vscode.TreeDataProvider<TaskItem> {
         const activeEditorUri = vscode.window.activeTextEditor?.document.uri;
         const activeFileKey = activeEditorUri && activeEditorUri.scheme === 'file' ? keyOf(activeEditorUri) : undefined;
 
-        // Rows = union of live terminals, open file tabs, and saved (closed) tasks.
-        const names = new Set<string>([...liveNames, ...files.keys(), ...Object.keys(saved)]);
+        // Rows = union of live terminals, open file tabs, saved (closed) tasks, and Claude sessions.
+        const claudeKeys = this.claude?.keys() ?? [];
+        const names = new Set<string>([...liveNames, ...files.keys(), ...Object.keys(saved), ...claudeKeys]);
         const items = [...names].map(name =>
             new TaskItem(
                 name,
@@ -108,6 +119,7 @@ export class TaskBoardProvider implements vscode.TreeDataProvider<TaskItem> {
                 liveNames.has(name),
                 files.get(name),
                 name === activeTerminal || name === activeFileKey,
+                this.claude?.get(name),
             )
         );
 

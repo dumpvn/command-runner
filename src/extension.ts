@@ -9,6 +9,7 @@ import Command, { TerminalOptions } from './command';
 import { speak } from './readAloud';
 import { setupSessionRestore } from './sessionRestore';
 import { TaskStore, TaskBoardProvider, TaskItem, TaskStatus } from './taskBoard';
+import { ClaudeStatusWatcher } from './claudeStatus';
 
 
 
@@ -86,14 +87,17 @@ async function markRunLine(document: vscode.TextDocument, targetLine: number): P
 /** Registers the Tasks tree view and its status/manage commands. */
 function setupTaskBoard(context: vscode.ExtensionContext): void {
     const store = new TaskStore(context.workspaceState);
-    const provider = new TaskBoardProvider(store);
+    const claudeWatcher = new ClaudeStatusWatcher();
+    const provider = new TaskBoardProvider(store, claudeWatcher);
     context.subscriptions.push(
+        claudeWatcher,
         vscode.window.registerTreeDataProvider('command-runner.tasks', provider),
         vscode.window.onDidOpenTerminal(() => provider.refresh()),
         vscode.window.onDidCloseTerminal(() => provider.refresh()),
         vscode.window.onDidChangeActiveTerminal(() => provider.refresh()),
         vscode.window.tabGroups.onDidChangeTabs(() => provider.refresh()),
         vscode.window.onDidChangeActiveTextEditor(() => provider.refresh()),
+        claudeWatcher.onDidChange(() => provider.refresh()),
     );
 
     const setStatus = (status: TaskStatus) => async (item?: TaskItem) => {
