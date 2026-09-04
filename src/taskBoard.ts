@@ -1,6 +1,7 @@
 'use strict';
 
 import * as vscode from 'vscode';
+import * as path from 'path';
 
 export type TaskStatus = 'blocked' | 'inProgress' | 'waiting' | 'todo' | 'done';
 
@@ -21,6 +22,11 @@ const STATUS: Record<TaskStatus, StatusMeta> = {
 };
 
 const STORE_KEY = 'COMMAND_RUNNER_TASKS';
+
+/** Task key for a file uri: basename without extension (abc.md -> "abc"). */
+function keyOf(uri: vscode.Uri): string {
+    return path.basename(uri.fsPath, path.extname(uri.fsPath));
+}
 
 /** Persists an explicit status per terminal name in workspace state. */
 export class TaskStore {
@@ -45,17 +51,19 @@ export class TaskItem extends vscode.TreeItem {
     constructor(
         public readonly name: string,
         public readonly status: TaskStatus,
-        public readonly open: boolean,
+        public readonly hasTerminal: boolean,
+        public readonly fileUri: vscode.Uri | undefined,
         active: boolean,
     ) {
-        // Bold the whole label for the active terminal's task.
+        // Bold the whole label for the active terminal's / active editor's task.
         super(active ? { label: name, highlights: [[0, name.length]] } : name);
+        const open = hasTerminal || !!fileUri;
         const meta = STATUS[status];
         this.description = open ? meta.label : `${meta.label} · closed`;
-        this.tooltip = `${name} — ${meta.label}${open ? '' : ' (terminal closed)'}`;
+        this.tooltip = `${name} — ${meta.label}${open ? '' : ' (closed)'}`;
         this.iconPath = new vscode.ThemeIcon(meta.icon, meta.color ? new vscode.ThemeColor(meta.color) : undefined);
         this.contextValue = open ? 'task-open' : 'task-closed';
-        this.command = { command: 'command-runner.task.focus', title: 'Focus Terminal', arguments: [this] };
+        this.command = { command: 'command-runner.task.focus', title: 'Activate', arguments: [this] };
     }
 }
 
@@ -78,12 +86,31 @@ export class TaskBoardProvider implements vscode.TreeDataProvider<TaskItem> {
 
         const saved = this.store.all();
         const liveNames = new Set(vscode.window.terminals.map(t => t.name));
-        const activeName = vscode.window.activeTerminal?.name;
+        const activeTerminal = vscode.window.activeTerminal?.name;
 
-        // Rows = every live terminal (unmarked -> todo) plus saved tasks whose terminal is closed.
-        const names = new Set<string>([...liveNames, ...Object.keys(saved)]);
+        // First open file tab per basename (no extension) — the task key.
+        const files = new Map<string, vscode.Uri>();
+        for (const group of vscode.window.tabGroups.all) {
+            for (const tab of group.tabs) {
+                if (tab.input instanceof vscode.TabInputText && tab.input.uri.scheme === 'file') {
+                    const key = keyOf(tab.input.uri);
+                    if (key && !files.has(key)) files.set(key, tab.input.uri);
+                }
+            }
+        }
+        const activeEditorUri = vscode.window.activeTextEditor?.document.uri;
+        const activeFileKey = activeEditorUri && activeEditorUri.scheme === 'file' ? keyOf(activeEditorUri) : undefined;
+
+        // Rows = union of live terminals, open file tabs, and saved (closed) tasks.
+        const names = new Set<string>([...liveNames, ...files.keys(), ...Object.keys(saved)]);
         const items = [...names].map(name =>
-            new TaskItem(name, saved[name] ?? 'todo', liveNames.has(name), name === activeName)
+            new TaskItem(
+                name,
+                saved[name] ?? 'todo',
+                liveNames.has(name),
+                files.get(name),
+                name === activeTerminal || name === activeFileKey,
+            )
         );
 
         items.sort((a, b) =>

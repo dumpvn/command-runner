@@ -92,6 +92,8 @@ function setupTaskBoard(context: vscode.ExtensionContext): void {
         vscode.window.onDidOpenTerminal(() => provider.refresh()),
         vscode.window.onDidCloseTerminal(() => provider.refresh()),
         vscode.window.onDidChangeActiveTerminal(() => provider.refresh()),
+        vscode.window.tabGroups.onDidChangeTabs(() => provider.refresh()),
+        vscode.window.onDidChangeActiveTextEditor(() => provider.refresh()),
     );
 
     const setStatus = (status: TaskStatus) => async (item?: TaskItem) => {
@@ -104,11 +106,22 @@ function setupTaskBoard(context: vscode.ExtensionContext): void {
         await store.remove(item.name);
         provider.refresh();
     };
-    const reopen = (item?: TaskItem) => {
+    // Click / reopen: show the task's terminal (create if missing) and reveal its file if open.
+    const activate = async (item?: TaskItem) => {
         if (!item) return;
         const term = vscode.window.terminals.find(t => t.name === item.name)
             ?? vscode.window.createTerminal({ name: item.name });
-        term.show();
+        if (item.fileUri) {
+            term.show(true); // reveal terminal, keep focus for the editor
+            try {
+                const doc = await vscode.workspace.openTextDocument(item.fileUri);
+                await vscode.window.showTextDocument(doc, { preview: false });
+            } catch {
+                // File may have moved/been deleted; leave focus on the terminal.
+            }
+        } else {
+            term.show();
+        }
     };
 
     context.subscriptions.push(
@@ -119,8 +132,8 @@ function setupTaskBoard(context: vscode.ExtensionContext): void {
         vscode.commands.registerCommand('command-runner.task.setDone', setStatus('done')),
         vscode.commands.registerCommand('command-runner.task.clear', removeTask),
         vscode.commands.registerCommand('command-runner.task.remove', removeTask),
-        vscode.commands.registerCommand('command-runner.task.reopen', reopen),
-        vscode.commands.registerCommand('command-runner.task.focus', reopen),
+        vscode.commands.registerCommand('command-runner.task.reopen', activate),
+        vscode.commands.registerCommand('command-runner.task.focus', activate),
     );
 }
 
