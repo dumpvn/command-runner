@@ -169,17 +169,26 @@ export function activate(context: vscode.ExtensionContext): void {
         })
     );
 
+    // The editor<->terminal reveals below trigger each other's change events, so a
+    // programmatic reveal briefly suppresses its peer to break the feedback loop.
+    let syncSuppressUntil = 0;
+    const suppressSync = () => { syncSuppressUntil = Date.now() + 150; };
+
     // When the active editor changes, reveal a terminal whose name matches the
     // file's basename without extension (abc.md -> "abc"). Keeps editor focus;
     // does nothing when no such terminal exists.
     context.subscriptions.push(
         vscode.window.onDidChangeActiveTextEditor(editor => {
+            if (Date.now() < syncSuppressUntil) return;
             const uri = editor?.document.uri;
             if (!uri || uri.scheme !== 'file') return;
             const name = path.basename(uri.fsPath, path.extname(uri.fsPath));
             if (!name) return;
             const term = vscode.window.terminals.find(t => t.name === name);
-            if (term) term.show(true);
+            if (term) {
+                suppressSync();
+                term.show(true);
+            }
         })
     );
 
@@ -188,6 +197,7 @@ export function activate(context: vscode.ExtensionContext): void {
     // such tab exists.
     context.subscriptions.push(
         vscode.window.onDidChangeActiveTerminal(term => {
+            if (Date.now() < syncSuppressUntil) return;
             if (!term) return;
             const name = term.name;
             for (const group of vscode.window.tabGroups.all) {
@@ -195,6 +205,7 @@ export function activate(context: vscode.ExtensionContext): void {
                     if (tab.input instanceof vscode.TabInputText && tab.input.uri.scheme === 'file') {
                         const uri = tab.input.uri;
                         if (path.basename(uri.fsPath, path.extname(uri.fsPath)) === name) {
+                            suppressSync();
                             void vscode.window.showTextDocument(uri, { preview: false });
                             return;
                         }
