@@ -147,7 +147,7 @@ export class TaskBoardProvider implements vscode.TreeDataProvider<TaskItem> {
             items.push(new TaskItem(key, saved[key] ?? 'todo', false, undefined, false, this.claude?.get(key)));
         }
 
-        items.sort((a, b) => a.name.localeCompare(b.name));
+        items.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
         return items;
     }
 }
