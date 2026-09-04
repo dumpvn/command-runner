@@ -9,16 +9,14 @@ interface StatusMeta {
     label: string;
     icon: string;
     color?: string;
-    priority: number;
 }
 
-// Order of `priority` decides row order (blocked first, done last).
 const STATUS: Record<TaskStatus, StatusMeta> = {
-    blocked:    { label: 'Blocked',        icon: 'error',          color: 'charts.red',    priority: 0 },
-    inProgress: { label: 'In Progress',    icon: 'play',           color: 'charts.yellow', priority: 1 },
-    waiting:    { label: 'Waiting/Review',  icon: 'watch',          color: 'charts.blue',   priority: 2 },
-    todo:       { label: 'Todo',            icon: 'circle-outline',                         priority: 3 },
-    done:       { label: 'Done',            icon: 'pass-filled',    color: 'charts.green',  priority: 4 },
+    blocked:    { label: 'Blocked',        icon: 'error',          color: 'charts.red'    },
+    inProgress: { label: 'In Progress',    icon: 'play',           color: 'charts.yellow' },
+    waiting:    { label: 'Waiting/Review',  icon: 'watch',          color: 'charts.blue'   },
+    todo:       { label: 'Todo',            icon: 'circle-outline'                         },
+    done:       { label: 'Done',            icon: 'pass-filled',    color: 'charts.green'  },
 };
 
 const STORE_KEY = 'COMMAND_RUNNER_TASKS';
@@ -113,9 +111,7 @@ export class TaskBoardProvider implements vscode.TreeDataProvider<TaskItem> {
             )
         );
 
-        items.sort((a, b) =>
-            STATUS[a.status].priority - STATUS[b.status].priority || a.name.localeCompare(b.name)
-        );
+        items.sort((a, b) => a.name.localeCompare(b.name));
         return items;
     }
 }
