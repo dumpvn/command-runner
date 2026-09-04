@@ -17,6 +17,10 @@ function isState(s: unknown): s is ClaudeState {
 /** Watches the Claude hook status dir and exposes the live state per task key. */
 export class ClaudeStatusWatcher {
     private map = new Map<string, ClaudeState>();
+    // Activation order (session-scoped, empty on startup): a task's rank bumps to the
+    // newest value each time it enters `running`, and persists after the run ends.
+    private order = new Map<string, number>();
+    private counter = 0;
     private _onDidChange = new vscode.EventEmitter<void>();
     readonly onDidChange = this._onDidChange.event;
     private watcher: vscode.FileSystemWatcher;
@@ -38,6 +42,14 @@ export class ClaudeStatusWatcher {
 
     get(key: string): ClaudeState | undefined {
         return this.map.get(key);
+    }
+
+    orderKeys(): string[] {
+        return [...this.order.keys()];
+    }
+
+    rank(key: string): number | undefined {
+        return this.order.get(key);
     }
 
     dispose(): void {
@@ -69,10 +81,15 @@ export class ClaudeStatusWatcher {
 
     private onFile(uri: vscode.Uri): void {
         const state = this.read(uri.fsPath);
-        if (state) {
-            this.map.set(this.keyOf(uri), state);
-            this._onDidChange.fire();
+        if (!state) return;
+        const key = this.keyOf(uri);
+        const prev = this.map.get(key);
+        this.map.set(key, state);
+        // Bump to the top on each fresh transition into running.
+        if (state === 'running' && prev !== 'running') {
+            this.order.set(key, ++this.counter);
         }
+        this._onDidChange.fire();
     }
 
     private onDelete(uri: vscode.Uri): void {

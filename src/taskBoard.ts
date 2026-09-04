@@ -65,6 +65,7 @@ export class TaskItem extends vscode.TreeItem {
         public readonly fileUri: vscode.Uri | undefined,
         active: boolean,
         claude?: ClaudeState,
+        public readonly activationRank?: number,
     ) {
         // Bold the whole label for the active terminal's / active editor's task.
         super(active ? { label: name, highlights: [[0, name.length]] } : name);
@@ -121,15 +122,25 @@ export class TaskBoardProvider implements vscode.TreeDataProvider<TaskItem> {
         // file "DAD-1234-something"). Keys matching no row become their own bare row.
         const claudeKeys = this.claude?.keys() ?? [];
         const usedKeys = new Set<string>();
-        const claudeFor = (name: string): ClaudeState | undefined => {
-            if (!this.claude) return undefined;
+        // Longest prefix-matching key from a candidate list (folder "DAD-1234" -> row "DAD-1234-x").
+        const bestKey = (name: string, candidates: string[]): string | undefined => {
             let best: string | undefined;
-            for (const key of claudeKeys) {
+            for (const key of candidates) {
                 if (matchesPrefix(name, key) && (!best || key.length > best.length)) best = key;
             }
-            if (!best) return undefined;
-            usedKeys.add(best);
-            return this.claude.get(best);
+            return best;
+        };
+        const claudeFor = (name: string): ClaudeState | undefined => {
+            const key = this.claude && bestKey(name, claudeKeys);
+            if (!key) return undefined;
+            usedKeys.add(key);
+            return this.claude!.get(key);
+        };
+        // Rank comes from the persisted activation order, so a task keeps its place after the run ends.
+        const rankFor = (name: string): number | undefined => {
+            if (!this.claude) return undefined;
+            const key = bestKey(name, this.claude.orderKeys());
+            return key ? this.claude.rank(key) : undefined;
         };
 
         const items = [...baseNames].map(name =>
@@ -140,14 +151,21 @@ export class TaskBoardProvider implements vscode.TreeDataProvider<TaskItem> {
                 files.get(name),
                 name === activeTerminal || name === activeFileKey,
                 claudeFor(name),
+                rankFor(name),
             )
         );
         for (const key of claudeKeys) {
             if (usedKeys.has(key) || baseNames.has(key)) continue;
-            items.push(new TaskItem(key, saved[key] ?? 'todo', false, undefined, false, this.claude?.get(key)));
+            items.push(new TaskItem(key, saved[key] ?? 'todo', false, undefined, false, this.claude?.get(key), this.claude?.rank(key)));
         }
 
-        items.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+        // Activated tasks first (most recent on top), then the rest by natural name order.
+        items.sort((a, b) => {
+            if (a.activationRank !== undefined && b.activationRank !== undefined) return b.activationRank - a.activationRank;
+            if (a.activationRank !== undefined) return -1;
+            if (b.activationRank !== undefined) return 1;
+            return a.name.localeCompare(b.name, undefined, { numeric: true });
+        });
         return items;
     }
 }
