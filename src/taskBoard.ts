@@ -24,7 +24,6 @@ const STATUS: Record<TaskStatus, StatusMeta> = {
 const CLAUDE_META: Record<ClaudeState, StatusMeta> = {
     running: { label: 'Running',           icon: 'loading~spin', color: 'charts.yellow' },
     input:   { label: 'Needs your input',  icon: 'bell',         color: 'charts.orange' },
-    idle:    { label: 'Idle',              icon: 'circle-outline'                       },
 };
 
 const STORE_KEY = 'COMMAND_RUNNER_TASKS';

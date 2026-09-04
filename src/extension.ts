@@ -134,7 +134,7 @@ function setupTaskBoard(context: vscode.ExtensionContext): void {
         vscode.commands.registerCommand('command-runner.task.setWaiting', setStatus('waiting')),
         vscode.commands.registerCommand('command-runner.task.setTodo', setStatus('todo')),
         vscode.commands.registerCommand('command-runner.task.setDone', setStatus('done')),
-        vscode.commands.registerCommand('command-runner.task.clear', removeTask),
+        vscode.commands.registerCommand('command-runner.task.clear', setStatus('todo')),
         vscode.commands.registerCommand('command-runner.task.remove', removeTask),
         vscode.commands.registerCommand('command-runner.task.reopen', activate),
         vscode.commands.registerCommand('command-runner.task.focus', activate),

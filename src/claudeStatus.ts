@@ -5,13 +5,13 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
-export type ClaudeState = 'running' | 'input' | 'idle';
+export type ClaudeState = 'running' | 'input';
 
 // Written by the cr-claude-status.ps1 Claude hook, keyed by basename(session cwd).
 const DIR = path.join(os.tmpdir(), 'cr-claude-status');
 
 function isState(s: unknown): s is ClaudeState {
-    return s === 'running' || s === 'input' || s === 'idle';
+    return s === 'running' || s === 'input';
 }
 
 /** Watches the Claude hook status dir and exposes the live state per task key. */
