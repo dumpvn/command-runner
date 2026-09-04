@@ -34,6 +34,11 @@ function keyOf(uri: vscode.Uri): string {
     return path.basename(uri.fsPath, path.extname(uri.fsPath));
 }
 
+/** True when `key` equals `name` or is a prefix of it ending at a non-alphanumeric boundary. */
+function matchesPrefix(name: string, key: string): boolean {
+    return name.startsWith(key) && (name.length === key.length || !/[A-Za-z0-9]/.test(name[key.length]));
+}
+
 /** Persists an explicit status per terminal name in workspace state. */
 export class TaskStore {
     constructor(private state: vscode.Memento) {}
@@ -109,19 +114,39 @@ export class TaskBoardProvider implements vscode.TreeDataProvider<TaskItem> {
         const activeEditorUri = vscode.window.activeTextEditor?.document.uri;
         const activeFileKey = activeEditorUri && activeEditorUri.scheme === 'file' ? keyOf(activeEditorUri) : undefined;
 
-        // Rows = union of live terminals, open file tabs, saved (closed) tasks, and Claude sessions.
+        // Rows = live terminals + open file tabs + saved (closed) tasks.
+        const baseNames = new Set<string>([...liveNames, ...files.keys(), ...Object.keys(saved)]);
+
+        // A Claude session (keyed by cwd basename) merges into the row it exactly matches, else
+        // the longest row whose name starts with the key at a separator (folder "DAD-1234" ->
+        // file "DAD-1234-something"). Keys matching no row become their own bare row.
         const claudeKeys = this.claude?.keys() ?? [];
-        const names = new Set<string>([...liveNames, ...files.keys(), ...Object.keys(saved), ...claudeKeys]);
-        const items = [...names].map(name =>
+        const usedKeys = new Set<string>();
+        const claudeFor = (name: string): ClaudeState | undefined => {
+            if (!this.claude) return undefined;
+            let best: string | undefined;
+            for (const key of claudeKeys) {
+                if (matchesPrefix(name, key) && (!best || key.length > best.length)) best = key;
+            }
+            if (!best) return undefined;
+            usedKeys.add(best);
+            return this.claude.get(best);
+        };
+
+        const items = [...baseNames].map(name =>
             new TaskItem(
                 name,
                 saved[name] ?? 'todo',
                 liveNames.has(name),
                 files.get(name),
                 name === activeTerminal || name === activeFileKey,
-                this.claude?.get(name),
+                claudeFor(name),
             )
         );
+        for (const key of claudeKeys) {
+            if (usedKeys.has(key) || baseNames.has(key)) continue;
+            items.push(new TaskItem(key, saved[key] ?? 'todo', false, undefined, false, this.claude?.get(key)));
+        }
 
         items.sort((a, b) => a.name.localeCompare(b.name));
         return items;
