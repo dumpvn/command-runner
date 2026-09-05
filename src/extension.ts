@@ -110,6 +110,24 @@ function setupTaskBoard(context: vscode.ExtensionContext): void {
         await store.remove(item.name);
         provider.refresh();
     };
+    // Close both the terminal(s) and file tab(s) whose name matches the task.
+    const closeTask = async (item?: TaskItem) => {
+        if (!item) return;
+        for (const t of vscode.window.terminals) {
+            if (t.name === item.name) t.dispose();
+        }
+        const tabs: vscode.Tab[] = [];
+        for (const group of vscode.window.tabGroups.all) {
+            for (const tab of group.tabs) {
+                if (tab.input instanceof vscode.TabInputText &&
+                    path.basename(tab.input.uri.fsPath, path.extname(tab.input.uri.fsPath)) === item.name) {
+                    tabs.push(tab);
+                }
+            }
+        }
+        if (tabs.length) await vscode.window.tabGroups.close(tabs);
+        provider.refresh();
+    };
     // Click / reopen: show the task's terminal (create if missing) and reveal its file if open.
     const activate = async (item?: TaskItem) => {
         if (!item) return;
@@ -136,6 +154,7 @@ function setupTaskBoard(context: vscode.ExtensionContext): void {
         vscode.commands.registerCommand('command-runner.task.setDone', setStatus('done')),
         vscode.commands.registerCommand('command-runner.task.clear', setStatus('todo')),
         vscode.commands.registerCommand('command-runner.task.remove', removeTask),
+        vscode.commands.registerCommand('command-runner.task.close', closeTask),
         vscode.commands.registerCommand('command-runner.task.reopen', activate),
         vscode.commands.registerCommand('command-runner.task.focus', activate),
     );

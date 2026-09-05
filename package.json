@@ -77,6 +77,11 @@
                 "title": "Clear Status"
             },
             {
+                "command": "command-runner.task.close",
+                "title": "Close",
+                "icon": "$(close)"
+            },
+            {
                 "command": "command-runner.task.reopen",
                 "title": "Reopen Terminal",
                 "icon": "$(terminal)"
@@ -301,6 +306,11 @@
                     "command": "command-runner.task.clear",
                     "when": "view == command-runner.tasks",
                     "group": "2_manage@1"
+                },
+                {
+                    "command": "command-runner.task.close",
+                    "when": "view == command-runner.tasks && viewItem == task-open",
+                    "group": "2_manage@2"
                 },
                 {
                     "command": "command-runner.task.reopen",
