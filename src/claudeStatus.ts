@@ -52,6 +52,12 @@ export class ClaudeStatusWatcher {
         return this.order.get(key);
     }
 
+    /** Bump a key to the newest activation rank (used by Move to Top). */
+    bump(key: string): void {
+        this.order.set(key, ++this.counter);
+        this._onDidChange.fire();
+    }
+
     /** Clear the live status for a row: delete the status file for the key it maps to. */
     clearForName(name: string): void {
         let best: string | undefined;

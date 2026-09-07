@@ -82,6 +82,11 @@
                 "icon": "$(close)"
             },
             {
+                "command": "command-runner.task.moveToTop",
+                "title": "Move to Top",
+                "icon": "$(arrow-up)"
+            },
+            {
                 "command": "command-runner.task.reopen",
                 "title": "Reopen Terminal",
                 "icon": "$(terminal)"
@@ -262,6 +267,11 @@
                 }
             ],
             "view/item/context": [
+                {
+                    "command": "command-runner.task.moveToTop",
+                    "when": "view == command-runner.tasks",
+                    "group": "0_order@1"
+                },
                 {
                     "command": "command-runner.task.setInProgress",
                     "when": "view == command-runner.tasks && viewItem == task-open",

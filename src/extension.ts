@@ -110,6 +110,11 @@ function setupTaskBoard(context: vscode.ExtensionContext): void {
         await store.remove(item.name);
         provider.refresh();
     };
+    const moveToTop = (item?: TaskItem) => {
+        if (!item) return;
+        claudeWatcher.bump(item.name);
+        provider.refresh();
+    };
     // Clear Status: reset to Todo and drop any stale Claude live status holding the row.
     const clearStatus = async (item?: TaskItem) => {
         if (!item) return;
@@ -165,6 +170,7 @@ function setupTaskBoard(context: vscode.ExtensionContext): void {
         vscode.commands.registerCommand('command-runner.task.clear', clearStatus),
         vscode.commands.registerCommand('command-runner.task.remove', removeTask),
         vscode.commands.registerCommand('command-runner.task.close', closeTask),
+        vscode.commands.registerCommand('command-runner.task.moveToTop', moveToTop),
         vscode.commands.registerCommand('command-runner.task.reopen', activate),
         vscode.commands.registerCommand('command-runner.task.focus', activate),
     );
