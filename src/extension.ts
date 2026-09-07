@@ -126,6 +126,7 @@ function setupTaskBoard(context: vscode.ExtensionContext): void {
             }
         }
         if (tabs.length) await vscode.window.tabGroups.close(tabs);
+        claudeWatcher.clearForName(item.name);
         provider.refresh();
     };
     // Click / reopen: show the task's terminal (create if missing) and reveal its file if open.

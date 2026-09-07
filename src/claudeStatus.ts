@@ -52,6 +52,21 @@ export class ClaudeStatusWatcher {
         return this.order.get(key);
     }
 
+    /** Clear the live status for a row: delete the status file for the key it maps to. */
+    clearForName(name: string): void {
+        let best: string | undefined;
+        for (const key of this.map.keys()) {
+            // key equals the row name, or is a prefix of it at a separator (web -> web-something).
+            const boundary = name.length === key.length || !/[A-Za-z0-9]/.test(name[key.length]);
+            if (name.startsWith(key) && boundary && (!best || key.length > best.length)) best = key;
+        }
+        if (!best) return;
+        this.map.delete(best);
+        this.order.delete(best);
+        try { fs.rmSync(path.join(DIR, best + '.json'), { force: true }); } catch { /* ignore */ }
+        this._onDidChange.fire();
+    }
+
     dispose(): void {
         this.watcher.dispose();
         this._onDidChange.dispose();
