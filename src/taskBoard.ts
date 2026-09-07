@@ -159,12 +159,14 @@ export class TaskBoardProvider implements vscode.TreeDataProvider<TaskItem> {
             items.push(new TaskItem(key, saved[key] ?? 'todo', false, undefined, false, this.claude?.get(key), this.claude?.rank(key)));
         }
 
-        // Activated tasks first (most recent on top), then the rest by natural name order.
+        // Three bands: positive rank = pinned/active top, no rank = middle (natural name),
+        // negative rank = sunk bottom. Within a ranked band, higher rank sits higher.
+        const band = (r?: number) => r === undefined ? 1 : (r > 0 ? 0 : 2);
         items.sort((a, b) => {
-            if (a.activationRank !== undefined && b.activationRank !== undefined) return b.activationRank - a.activationRank;
-            if (a.activationRank !== undefined) return -1;
-            if (b.activationRank !== undefined) return 1;
-            return a.name.localeCompare(b.name, undefined, { numeric: true });
+            const ba = band(a.activationRank), bb = band(b.activationRank);
+            if (ba !== bb) return ba - bb;
+            if (ba === 1) return a.name.localeCompare(b.name, undefined, { numeric: true });
+            return b.activationRank! - a.activationRank!;
         });
         return items;
     }

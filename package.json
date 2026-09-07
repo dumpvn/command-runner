@@ -87,6 +87,11 @@
                 "icon": "$(arrow-up)"
             },
             {
+                "command": "command-runner.task.moveToBottom",
+                "title": "Move to Bottom",
+                "icon": "$(arrow-down)"
+            },
+            {
                 "command": "command-runner.task.reopen",
                 "title": "Reopen Terminal",
                 "icon": "$(terminal)"
@@ -271,6 +276,11 @@
                     "command": "command-runner.task.moveToTop",
                     "when": "view == command-runner.tasks",
                     "group": "0_order@1"
+                },
+                {
+                    "command": "command-runner.task.moveToBottom",
+                    "when": "view == command-runner.tasks",
+                    "group": "0_order@2"
                 },
                 {
                     "command": "command-runner.task.setInProgress",

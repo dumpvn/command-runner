@@ -21,6 +21,7 @@ export class ClaudeStatusWatcher {
     // newest value each time it enters `running`, and persists after the run ends.
     private order = new Map<string, number>();
     private counter = 0;
+    private bottomCounter = 0;
     private _onDidChange = new vscode.EventEmitter<void>();
     readonly onDidChange = this._onDidChange.event;
     private watcher: vscode.FileSystemWatcher;
@@ -52,9 +53,15 @@ export class ClaudeStatusWatcher {
         return this.order.get(key);
     }
 
-    /** Bump a key to the newest activation rank (used by Move to Top). */
+    /** Bump a key to the newest activation rank (positive = top; used by Move to Top). */
     bump(key: string): void {
         this.order.set(key, ++this.counter);
+        this._onDidChange.fire();
+    }
+
+    /** Sink a key below everything (negative rank; used by Move to Bottom). */
+    sink(key: string): void {
+        this.order.set(key, --this.bottomCounter);
         this._onDidChange.fire();
     }
 
