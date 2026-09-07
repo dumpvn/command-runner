@@ -117,7 +117,8 @@ function setupTaskBoard(context: vscode.ExtensionContext): void {
         await store.set(item.name, 'todo');
         provider.refresh();
     };
-    // Close both the terminal(s) and file tab(s) whose name matches the task.
+    // Close fully removes the task: dispose its terminal(s), close its file tab(s), clear any
+    // Claude live status, and drop its saved status so the row disappears entirely.
     const closeTask = async (item?: TaskItem) => {
         if (!item) return;
         for (const t of vscode.window.terminals) {
@@ -134,6 +135,7 @@ function setupTaskBoard(context: vscode.ExtensionContext): void {
         }
         if (tabs.length) await vscode.window.tabGroups.close(tabs);
         claudeWatcher.clearForName(item.name);
+        await store.remove(item.name);
         provider.refresh();
     };
     // Click / reopen: show the task's terminal (create if missing) and reveal its file if open.
