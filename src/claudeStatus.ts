@@ -25,6 +25,7 @@ export class ClaudeStatusWatcher {
     private _onDidChange = new vscode.EventEmitter<void>();
     readonly onDidChange = this._onDidChange.event;
     private watcher: vscode.FileSystemWatcher;
+    private reconcileTimer: NodeJS.Timeout;
 
     constructor() {
         try { fs.mkdirSync(DIR, { recursive: true }); } catch { /* ignore */ }
@@ -35,6 +36,8 @@ export class ClaudeStatusWatcher {
         this.watcher.onDidCreate(uri => this.onFile(uri));
         this.watcher.onDidChange(uri => this.onFile(uri));
         this.watcher.onDidDelete(uri => this.onDelete(uri));
+        // Safety net for missed/coalesced watcher events and partial-read races.
+        this.reconcileTimer = setInterval(() => this.reconcile(), 1000);
     }
 
     keys(): string[] {
@@ -81,6 +84,7 @@ export class ClaudeStatusWatcher {
     }
 
     dispose(): void {
+        clearInterval(this.reconcileTimer);
         this.watcher.dispose();
         this._onDidChange.dispose();
     }
@@ -107,17 +111,38 @@ export class ClaudeStatusWatcher {
         }
     }
 
-    private onFile(uri: vscode.Uri): void {
-        const state = this.read(uri.fsPath);
-        if (!state) return;
-        const key = this.keyOf(uri);
+    // Set a key's state; bump to the top on each fresh transition into running. Returns whether it changed.
+    private apply(key: string, state: ClaudeState): boolean {
         const prev = this.map.get(key);
+        if (prev === state) return false;
         this.map.set(key, state);
-        // Bump to the top on each fresh transition into running.
         if (state === 'running' && prev !== 'running') {
             this.order.set(key, ++this.counter);
         }
-        this._onDidChange.fire();
+        return true;
+    }
+
+    private onFile(uri: vscode.Uri): void {
+        const state = this.read(uri.fsPath);
+        if (state && this.apply(this.keyOf(uri), state)) this._onDidChange.fire();
+    }
+
+    // Re-sync the map to what's on disk (catches missed watcher events and partial reads).
+    private reconcile(): void {
+        let files: string[];
+        try { files = fs.readdirSync(DIR).filter(f => f.endsWith('.json')); } catch { return; }
+        const present = new Set<string>();
+        let changed = false;
+        for (const f of files) {
+            const key = path.basename(f, '.json');
+            present.add(key); // file exists (readable or mid-write); never drop it on a transient read failure
+            const state = this.read(path.join(DIR, f));
+            if (state && this.apply(key, state)) changed = true;
+        }
+        for (const key of [...this.map.keys()]) {
+            if (!present.has(key) && this.map.delete(key)) changed = true;
+        }
+        if (changed) this._onDidChange.fire();
     }
 
     private onDelete(uri: vscode.Uri): void {
