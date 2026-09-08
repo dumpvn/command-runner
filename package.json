@@ -58,9 +58,19 @@
                 "icon": "$(play)"
             },
             {
-                "command": "command-runner.task.setWaiting",
-                "title": "Set Waiting/Review",
-                "icon": "$(watch)"
+                "command": "command-runner.task.setQa",
+                "title": "Set QA Process",
+                "icon": "$(beaker)"
+            },
+            {
+                "command": "command-runner.task.setCodeReview",
+                "title": "Set Code Review",
+                "icon": "$(git-pull-request)"
+            },
+            {
+                "command": "command-runner.task.setCabReview",
+                "title": "Set CAB Review",
+                "icon": "$(checklist)"
             },
             {
                 "command": "command-runner.task.setTodo",
@@ -308,19 +318,29 @@
                     "group": "1_status@2"
                 },
                 {
-                    "command": "command-runner.task.setWaiting",
+                    "command": "command-runner.task.setQa",
                     "when": "view == command-runner.tasks",
                     "group": "1_status@3"
                 },
                 {
-                    "command": "command-runner.task.setTodo",
+                    "command": "command-runner.task.setCodeReview",
                     "when": "view == command-runner.tasks",
                     "group": "1_status@4"
                 },
                 {
-                    "command": "command-runner.task.setDone",
+                    "command": "command-runner.task.setCabReview",
                     "when": "view == command-runner.tasks",
                     "group": "1_status@5"
+                },
+                {
+                    "command": "command-runner.task.setTodo",
+                    "when": "view == command-runner.tasks",
+                    "group": "1_status@6"
+                },
+                {
+                    "command": "command-runner.task.setDone",
+                    "when": "view == command-runner.tasks",
+                    "group": "1_status@7"
                 },
                 {
                     "command": "command-runner.task.clear",

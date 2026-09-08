@@ -169,7 +169,9 @@ function setupTaskBoard(context: vscode.ExtensionContext): void {
     context.subscriptions.push(
         vscode.commands.registerCommand('command-runner.task.setBlocked', setStatus('blocked')),
         vscode.commands.registerCommand('command-runner.task.setInProgress', setStatus('inProgress')),
-        vscode.commands.registerCommand('command-runner.task.setWaiting', setStatus('waiting')),
+        vscode.commands.registerCommand('command-runner.task.setQa', setStatus('qa')),
+        vscode.commands.registerCommand('command-runner.task.setCodeReview', setStatus('codeReview')),
+        vscode.commands.registerCommand('command-runner.task.setCabReview', setStatus('cabReview')),
         vscode.commands.registerCommand('command-runner.task.setTodo', setStatus('todo')),
         vscode.commands.registerCommand('command-runner.task.setDone', setStatus('done')),
         vscode.commands.registerCommand('command-runner.task.clear', clearStatus),

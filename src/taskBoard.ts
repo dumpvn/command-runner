@@ -4,7 +4,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import { ClaudeState, ClaudeStatusWatcher } from './claudeStatus';
 
-export type TaskStatus = 'blocked' | 'inProgress' | 'waiting' | 'todo' | 'done';
+export type TaskStatus = 'blocked' | 'inProgress' | 'qa' | 'codeReview' | 'cabReview' | 'todo' | 'done';
 
 interface StatusMeta {
     label: string;
@@ -13,12 +13,19 @@ interface StatusMeta {
 }
 
 const STATUS: Record<TaskStatus, StatusMeta> = {
-    blocked:    { label: 'Blocked',        icon: 'error',          color: 'charts.red'    },
-    inProgress: { label: 'In Progress',    icon: 'play',           color: 'charts.yellow' },
-    waiting:    { label: 'Waiting/Review',  icon: 'watch',          color: 'charts.blue'   },
-    todo:       { label: 'Todo',            icon: 'circle-outline'                         },
-    done:       { label: 'Done',            icon: 'pass-filled',    color: 'charts.green'  },
+    blocked:    { label: 'Blocked',      icon: 'error',            color: 'charts.red'    },
+    inProgress: { label: 'In Progress',  icon: 'play',             color: 'charts.yellow' },
+    qa:         { label: 'QA Process',   icon: 'beaker',           color: 'charts.purple' },
+    codeReview: { label: 'Code Review',  icon: 'git-pull-request', color: 'charts.blue'   },
+    cabReview:  { label: 'CAB Review',   icon: 'checklist',        color: 'charts.orange' },
+    todo:       { label: 'Todo',         icon: 'circle-outline'                           },
+    done:       { label: 'Done',         icon: 'pass-filled',      color: 'charts.green'  },
 };
+
+/** Coerce a persisted value to a known status (old/unknown values -> Todo). */
+function asStatus(s: string | undefined): TaskStatus {
+    return s && s in STATUS ? s as TaskStatus : 'todo';
+}
 
 // Live Claude session state takes over the row's icon/text when present.
 const CLAUDE_META: Record<ClaudeState, StatusMeta> = {
@@ -146,7 +153,7 @@ export class TaskBoardProvider implements vscode.TreeDataProvider<TaskItem> {
         const items = [...baseNames].map(name =>
             new TaskItem(
                 name,
-                saved[name] ?? 'todo',
+                asStatus(saved[name]),
                 liveNames.has(name),
                 files.get(name),
                 name === activeTerminal || name === activeFileKey,
@@ -156,7 +163,7 @@ export class TaskBoardProvider implements vscode.TreeDataProvider<TaskItem> {
         );
         for (const key of claudeKeys) {
             if (usedKeys.has(key) || baseNames.has(key)) continue;
-            items.push(new TaskItem(key, saved[key] ?? 'todo', false, undefined, false, this.claude?.get(key), this.claude?.rank(key)));
+            items.push(new TaskItem(key, asStatus(saved[key]), false, undefined, false, this.claude?.get(key), this.claude?.rank(key)));
         }
 
         // Three bands: positive rank = pinned/active top, no rank = middle (natural name),
