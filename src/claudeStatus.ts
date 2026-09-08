@@ -9,6 +9,14 @@ export type ClaudeState = 'running' | 'input';
 
 // Written by the cr-claude-status.ps1 Claude hook, keyed by basename(session cwd).
 const DIR = path.join(os.tmpdir(), 'cr-claude-status');
+// Persisted row order (per workspace), so Move-to-Top/Bottom and activation order survive restart.
+const ORDER_KEY = 'COMMAND_RUNNER_ORDER';
+
+interface PersistedOrder {
+    order: Record<string, number>;
+    counter: number;
+    bottomCounter: number;
+}
 
 function isState(s: unknown): s is ClaudeState {
     return s === 'running' || s === 'input';
@@ -17,8 +25,8 @@ function isState(s: unknown): s is ClaudeState {
 /** Watches the Claude hook status dir and exposes the live state per task key. */
 export class ClaudeStatusWatcher {
     private map = new Map<string, ClaudeState>();
-    // Activation order (session-scoped, empty on startup): a task's rank bumps to the
-    // newest value each time it enters `running`, and persists after the run ends.
+    // Row order: a task's rank bumps to the newest value each time it enters `running`
+    // (or via Move to Top/Bottom), and persists across restart via workspace state.
     private order = new Map<string, number>();
     private counter = 0;
     private bottomCounter = 0;
@@ -27,7 +35,8 @@ export class ClaudeStatusWatcher {
     private watcher: vscode.FileSystemWatcher;
     private reconcileTimer: NodeJS.Timeout;
 
-    constructor() {
+    constructor(private state?: vscode.Memento) {
+        this.loadOrder();
         try { fs.mkdirSync(DIR, { recursive: true }); } catch { /* ignore */ }
         this.loadAll();
         this.watcher = vscode.workspace.createFileSystemWatcher(
@@ -59,13 +68,31 @@ export class ClaudeStatusWatcher {
     /** Bump a key to the newest activation rank (positive = top; used by Move to Top). */
     bump(key: string): void {
         this.order.set(key, ++this.counter);
+        this.saveOrder();
         this._onDidChange.fire();
     }
 
     /** Sink a key below everything (negative rank; used by Move to Bottom). */
     sink(key: string): void {
         this.order.set(key, --this.bottomCounter);
+        this.saveOrder();
         this._onDidChange.fire();
+    }
+
+    private loadOrder(): void {
+        const saved = this.state?.get<PersistedOrder>(ORDER_KEY);
+        if (!saved) return;
+        this.order = new Map(Object.entries(saved.order ?? {}));
+        this.counter = saved.counter ?? 0;
+        this.bottomCounter = saved.bottomCounter ?? 0;
+    }
+
+    private saveOrder(): void {
+        void this.state?.update(ORDER_KEY, {
+            order: Object.fromEntries(this.order),
+            counter: this.counter,
+            bottomCounter: this.bottomCounter,
+        } as PersistedOrder);
     }
 
     /** Clear the live status for a row: delete the status file for the key it maps to. */
@@ -79,6 +106,7 @@ export class ClaudeStatusWatcher {
         if (!best) return;
         this.map.delete(best);
         this.order.delete(best);
+        this.saveOrder();
         try { fs.rmSync(path.join(DIR, best + '.json'), { force: true }); } catch { /* ignore */ }
         this._onDidChange.fire();
     }
@@ -118,6 +146,7 @@ export class ClaudeStatusWatcher {
         this.map.set(key, state);
         if (state === 'running' && prev !== 'running') {
             this.order.set(key, ++this.counter);
+            this.saveOrder();
         }
         return true;
     }

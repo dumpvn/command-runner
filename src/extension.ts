@@ -87,7 +87,7 @@ async function markRunLine(document: vscode.TextDocument, targetLine: number): P
 /** Registers the Tasks tree view and its status/manage commands. */
 function setupTaskBoard(context: vscode.ExtensionContext): void {
     const store = new TaskStore(context.workspaceState);
-    const claudeWatcher = new ClaudeStatusWatcher();
+    const claudeWatcher = new ClaudeStatusWatcher(context.workspaceState);
     const provider = new TaskBoardProvider(store, claudeWatcher);
     context.subscriptions.push(
         claudeWatcher,
